@@ -35,6 +35,12 @@ import { MobConnectFooter } from "./components/MobConnectFooter";
 import { MobileBottomNav } from "./components/MobileBottomNav";
 import { CommunityFeedSection } from "./components/CommunityFeedSection";
 import { SoundSettingsSheet } from "./components/SoundSettingsSheet";
+import { MateModal } from "./components/MateModal";
+import {
+  createMateConnection,
+  createFeedPost,
+} from "./firebase/firestore/content";
+import { recordPassedCardId } from "./firebase/firestore/mate-connections";
 import {
   loadSoundSettings,
   saveSoundSettings,
@@ -155,6 +161,9 @@ export default function App() {
   const [isGraffitiStudioOpen, setIsGraffitiStudioOpen] = useState(false);
   const [studioTargetImage, setStudioTargetImage] = useState<string>("");
 
+  const [isMateModalOpen, setIsMateModalOpen] = useState(false);
+  const [mateTarget, setMateTarget] = useState<{ id: string; name: string; photoUrl: string } | null>(null);
+
   // Sound FX State & Expanded Categories
   const [soundOpen, setSoundOpen] = useState(false);
   const [soundSettings, setSoundSettingsState] = useState<SoundSettings>(loadSoundSettings());
@@ -218,6 +227,7 @@ export default function App() {
     if (action === "pass") {
       playSpray();
       const targetId = currentCard.id;
+      recordPassedCardId(userSocial.handle || "local_user", targetId);
       setPassedCardIds((prev) => {
         const updated = Array.from(new Set([...prev, targetId]));
         localStorage.setItem("mrd_passed_ids", JSON.stringify(updated));
@@ -374,6 +384,30 @@ export default function App() {
       return updated;
     });
     sounds.playSpray();
+
+    // Mirror to Firestore collections
+    createMateConnection({
+      userId: userSocial.handle || "local_user",
+      targetUserId: card.id,
+      targetName: card.name,
+      targetPhotoUrl: card.imageUrl || "",
+      socialHandles: {
+        [userSocial.platform]: userSocial.handle,
+      },
+      showOnFeed: true,
+      shoutout: customMessage,
+    })
+      .then((connId) => {
+        createFeedPost({
+          mateConnectionId: connId,
+          userHandle: `@${userSocial.handle || "street_artist"}`,
+          targetName: card.name,
+          targetPhotoUrl: card.imageUrl || "",
+          shoutout: customMessage,
+          reactions: { hi: 1, drip: 1, cheers: 1 },
+        }).catch((err) => console.warn("Could not save feed post to Firestore:", err));
+      })
+      .catch((err) => console.warn("Could not save mate connection to Firestore:", err));
   };
 
   const handleReactToCommunityPost = (
@@ -589,7 +623,25 @@ export default function App() {
           ratingCompliment={lastRatingCompliment}
           onShareToCommunityFeed={handleShareMateToCommunityFeed}
           onOpenSocialModal={() => setIsSocialModalOpen(true)}
+          onOpenMateCustomizer={(target) => {
+            setMateTarget(target);
+            setIsMateModalOpen(true);
+          }}
         />
+
+        {/* Detailed Mate Socials & Shoutout Modal */}
+        {mateTarget && (
+          <MateModal
+            open={isMateModalOpen}
+            onClose={() => {
+              setIsMateModalOpen(false);
+              setMateTarget(null);
+            }}
+            target={mateTarget}
+            userId={userSocial.handle || "local_user"}
+            userHandle={userSocial.handle ? `@${userSocial.handle}` : "@street_artist"}
+          />
+        )}
 
         {/* Graffiti Studio Canvas Modal */}
         <GraffitiStudio

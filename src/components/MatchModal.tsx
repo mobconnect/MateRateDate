@@ -15,6 +15,7 @@ import {
   Globe,
   Edit2,
   Send,
+  Sliders,
 } from "lucide-react";
 import { PhotoCard, ConnectedSocial, ActionType } from "../types";
 
@@ -28,6 +29,7 @@ interface Props {
   ratingCompliment?: string;
   onShareToCommunityFeed?: (card: PhotoCard, customMessage?: string) => void;
   onOpenSocialModal?: () => void;
+  onOpenMateCustomizer?: (target: { id: string; name: string; photoUrl: string }) => void;
 }
 
 export const MatchModal: React.FC<Props> = ({
@@ -40,6 +42,7 @@ export const MatchModal: React.FC<Props> = ({
   ratingCompliment,
   onShareToCommunityFeed,
   onOpenSocialModal,
+  onOpenMateCustomizer,
 }) => {
   const [copied, setCopied] = useState(false);
   const [shareToCommunity, setShareToCommunity] = useState(true);
@@ -271,6 +274,24 @@ export const MatchModal: React.FC<Props> = ({
               </div>
             )}
           </div>
+        )}
+
+        {action === "mate" && onOpenMateCustomizer && (
+          <button
+            type="button"
+            onClick={() => {
+              onOpenMateCustomizer({
+                id: card.id,
+                name: card.name,
+                photoUrl: card.imageUrl || "",
+              });
+              onClose();
+            }}
+            className="w-full mb-2.5 py-2.5 px-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-cyan-300 border border-neutral-700 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>Customize Multi-Social Handles & Shoutout</span>
+          </button>
         )}
 
         <button

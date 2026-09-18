@@ -1,77 +1,106 @@
 "use client";
 
-import { onSnapshot, type DocumentData, type Query } from "firebase/firestore";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import {
+  collection,
+  query,
+  onSnapshot,
+  type DocumentData,
+  type Query,
+  type QueryConstraint,
+} from "firebase/firestore";
+import { db } from "../config";
 
-type State<T> = {
+export type CollectionState<T> = {
   status: "idle" | "loading" | "success" | "error";
-  data: T[];
+  data: (T & { id: string })[];
+  loading: boolean;
   error: Error | null;
   retryKey: number;
+  retry: () => void;
 };
 
-export function useCollection<T extends DocumentData>(
-  target: Query<T> | null
-) {
-  const [state, setState] = useState<State<T>>({
-    status: target ? "loading" : "idle",
-    data: [],
-    error: null,
-    retryKey: 0,
-  });
+/**
+ * Universal useCollection hook supporting both:
+ * 1. (path: string, constraints?: QueryConstraint[])
+ * 2. (target: Query<T> | null)
+ *
+ * Provides { data, loading, error, status, retry } with full resilience.
+ */
+export function useCollection<T extends DocumentData = DocumentData>(
+  pathOrQuery: string | Query<T> | null,
+  constraints?: Parameters<typeof query>[1][] | QueryConstraint[]
+): CollectionState<T> {
+  const [retryKey, setRetryKey] = useState(0);
 
   const retry = useCallback(() => {
-    setState((current) => ({
-      ...current,
-      status: target ? "loading" : "idle",
-      error: null,
-      retryKey: current.retryKey + 1,
-    }));
-  }, [target]);
+    setRetryKey((k) => k + 1);
+  }, []);
+
+  const targetQuery = useMemo(() => {
+    if (!pathOrQuery) return null;
+    if (typeof pathOrQuery === "string") {
+      try {
+        if (constraints && constraints.length > 0) {
+          return query(collection(db, pathOrQuery), ...(constraints as any)) as Query<T>;
+        }
+        return collection(db, pathOrQuery) as unknown as Query<T>;
+      } catch (err) {
+        console.warn("Failed to construct query for collection:", pathOrQuery, err);
+        return null;
+      }
+    }
+    return pathOrQuery;
+  }, [pathOrQuery, constraints]);
+
+  const [data, setData] = useState<(T & { id: string })[]>([]);
+  const [loading, setLoading] = useState<boolean>(Boolean(targetQuery));
+  const [error, setError] = useState<Error | null>(null);
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
+    targetQuery ? "loading" : "idle"
+  );
 
   useEffect(() => {
-    if (!target) {
-      setState({
-        status: "idle",
-        data: [],
-        error: null,
-        retryKey: 0,
-      });
+    if (!targetQuery) {
+      setData([]);
+      setLoading(false);
+      setError(null);
+      setStatus("idle");
       return;
     }
 
-    setState((current) => ({
-      ...current,
-      status: "loading",
-      error: null,
-    }));
+    setLoading(true);
+    setStatus("loading");
+    setError(null);
 
-    return onSnapshot(
-      target,
-      (snapshot) => {
-        setState((current) => ({
-          ...current,
-          status: "success",
-          data: snapshot.docs.map((document) => ({
-            id: document.id,
-            ...document.data(),
-          })) as T[],
-          error: null,
+    const unsub = onSnapshot(
+      targetQuery as any,
+      (snap: any) => {
+        const items = snap.docs.map((d: any) => ({
+          id: d.id,
+          ...(d.data() as T),
         }));
+        setData(items);
+        setLoading(false);
+        setError(null);
+        setStatus("success");
       },
-      (error) => {
-        setState((current) => ({
-          ...current,
-          status: "error",
-          data: [],
-          error,
-        }));
+      (err: any) => {
+        setError(err as Error);
+        setLoading(false);
+        setStatus("error");
       }
     );
-  }, [target, state.retryKey]);
+
+    return () => unsub();
+  }, [targetQuery, retryKey]);
 
   return {
-    ...state,
+    data,
+    loading,
+    error,
+    status,
+    retryKey,
     retry,
   };
 }

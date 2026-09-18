@@ -1,7 +1,11 @@
 import React from "react";
-import type { SoundSettings } from "../utils/audio";
 
 type SoundCategory = "spray" | "stamp" | "match" | "ui";
+
+interface SoundSettings {
+  master: boolean;
+  categories: Record<SoundCategory, boolean>;
+}
 
 interface Props {
   open: boolean;
@@ -23,12 +27,19 @@ export function SoundSettingsSheet({ open, onClose, settings, onChange }: Props)
   const toggleCategory = (cat: SoundCategory) => {
     onChange({
       ...settings,
-      categories: { ...settings.categories, [cat]: !settings.categories[cat] },
+      categories: {
+        ...settings.categories,
+        [cat]: !settings.categories[cat],
+      },
     });
   };
 
   const toggleMaster = () => {
-    onChange({ ...settings, master: !settings.master });
+    const nextMaster = !settings.master;
+    onChange({
+      ...settings,
+      master: nextMaster,
+    });
   };
 
   return (
@@ -55,6 +66,7 @@ export function SoundSettingsSheet({ open, onClose, settings, onChange }: Props)
           borderTopLeftRadius: 18,
           borderTopRightRadius: 18,
           padding: 18,
+          fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
           boxShadow: "0 -10px 40px rgba(0,0,0,0.6)",
         }}
         onClick={(e) => e.stopPropagation()}
@@ -92,7 +104,7 @@ export function SoundSettingsSheet({ open, onClose, settings, onChange }: Props)
           />
         </label>
 
-        {(Object.keys(CATEGORY_LABELS) as Array<SoundCategory>).map((cat) => (
+        {(Object.keys(CATEGORY_LABELS) as SoundCategory[]).map((cat) => (
           <label
             key={cat}
             style={{
@@ -123,7 +135,8 @@ export function SoundSettingsSheet({ open, onClose, settings, onChange }: Props)
               padding: "12px 14px",
               borderRadius: 12,
               border: "none",
-              background: "linear-gradient(90deg, #00f7ff, #00c3ff)",
+              background:
+                "linear-gradient(90deg, #00f7ff, #00c3ff)",
               color: "#001018",
               fontWeight: 800,
               letterSpacing: 0.4,
