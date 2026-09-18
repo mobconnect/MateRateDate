@@ -1,15 +1,10 @@
-import { SoundCategory, SoundSettings } from "../types";
+import type { SoundSettings, SoundCategory } from "../types";
 
-export type { SoundCategory, SoundSettings };
+export type { SoundSettings, SoundCategory };
 
 export const DEFAULT_SETTINGS: SoundSettings = {
   master: true,
-  categories: {
-    spray: true,
-    stamp: true,
-    match: true,
-    ui: true,
-  },
+  categories: { spray: true, stamp: true, match: true, ui: true },
 };
 
 const STORAGE_KEY = "materatedate_sound_settings";
@@ -47,7 +42,6 @@ class AudioController {
 
   constructor(settings: SoundSettings) {
     this.settings = settings;
-    // Auto initialize in browser context
     if (typeof window !== "undefined") {
       try {
         initGraffitiSFX();
@@ -108,7 +102,6 @@ class AudioController {
     }
   }
 
-  // Fallback synthesized Web Audio sound if HTMLAudioElement encounters error or before load
   private playSynthesizedFallback(cat: SoundCategory) {
     try {
       this.initWebAudioCtx();
@@ -116,7 +109,6 @@ class AudioController {
       const now = this.ctx.currentTime;
 
       if (cat === "ui") {
-        // Graffiti swipe sound: agitator metal ball rattle clink + pressurized aerosol burst
         const rattleOsc = this.ctx.createOscillator();
         const rattleGain = this.ctx.createGain();
         rattleOsc.type = "triangle";
@@ -210,19 +202,14 @@ class AudioController {
     try {
       clip.currentTime = 0;
       clip.volume = cat === "match" ? 0.7 : 0.9;
-      const promise = clip.play();
-      if (promise !== undefined) {
-        await promise.catch(() => {
-          // Autoplay or loading issue, fallback to synthetic Web Audio
-          this.playSynthesizedFallback(cat);
-        });
-      }
+      await clip.play().catch(() => {
+        this.playSynthesizedFallback(cat);
+      });
     } catch {
       this.playSynthesizedFallback(cat);
     }
   }
 
-  // Compatibility methods for existing codebase
   playSpray() {
     this.play("spray");
   }
@@ -248,46 +235,35 @@ class AudioController {
   }
 }
 
-// Singleton instance wired to localStorage
 const controller = new AudioController(loadSoundSettings());
 
 export function getAudioController() {
   return controller;
 }
 
-// Convenience helpers used across components
 export const playSpray = () => controller.play("spray");
 export const playStamp = () => controller.play("stamp");
 export const playMatch = () => controller.play("match");
 export const playUISwipe = () => controller.play("ui");
 
-// Initialize with graffiti-style assets (hosted in /public/sfx/)
 export function initGraffitiSFX() {
-  // Spray: aerosol bursts for actions & spray canvas
   controller.loadCategory("spray", [
     "/sfx/graffiti_spray_1.mp3",
     "/sfx/graffiti_spray_2.mp3",
     "/sfx/graffiti_spray_3.mp3",
   ]);
-
-  // Stamp: tag impact for MATE/RATE/DATE buttons
   controller.loadCategory("stamp", [
     "/sfx/tag_stamp_1.mp3",
     "/sfx/tag_stamp_2.mp3",
   ]);
-
-  // Match: celebration chimes
   controller.loadCategory("match", [
     "/sfx/match_celebration_1.mp3",
     "/sfx/match_celebration_2.mp3",
   ]);
-
-  // UI/Swipe: short graffiti spray for gestures
   controller.loadCategory("ui", [
     "/sfx/swipe_spray_1.mp3",
     "/sfx/swipe_spray_2.mp3",
   ]);
 }
 
-// Export singleton as sounds for backward compatibility
 export const sounds = controller;

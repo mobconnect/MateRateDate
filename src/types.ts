@@ -1,17 +1,41 @@
-export type SocialPlatform = 
-  | "instagram"
-  | "tiktok"
-  | "snapchat"
-  | "discord"
-  | "x"
-  | "whatsapp"
-  | "spotify";
+export type SoundCategory = "spray" | "stamp" | "match" | "ui";
 
-export interface ConnectedSocial {
-  platform: SocialPlatform;
-  handle: string;
-  url?: string;
-  isPrimary?: boolean;
+export interface SoundSettings {
+  master: boolean;
+  categories: Record<SoundCategory, boolean>;
+}
+
+export interface SocialHandles {
+  instagram?: string;
+  tiktok?: string;
+  snapchat?: string;
+  discord?: string;
+  x?: string;
+  whatsapp?: string;
+  spotify?: string;
+}
+
+export interface MateConnection {
+  id: string;
+  createdAt: number;
+  userId?: string;
+  targetUserId: string;
+  targetName: string;
+  targetPhotoUrl: string;
+  socialHandles: SocialHandles;
+  showOnFeed: boolean;
+  shoutout?: string;
+}
+
+export interface FeedPost {
+  id: string;
+  createdAt: number;
+  mateConnectionId: string;
+  userHandle: string;
+  targetName: string;
+  targetPhotoUrl: string;
+  shoutout?: string;
+  reactions: { hi: number; drip: number; cheers: number };
 }
 
 export interface PhotoCard {
@@ -35,36 +59,20 @@ export interface PhotoCard {
   isUserCard?: boolean;
 }
 
-export interface SocialHandles {
-  instagram?: string;
-  tiktok?: string;
-  snapchat?: string;
-  discord?: string;
-  x?: string;       // Twitter/X
-  whatsapp?: string;
-  spotify?: string;
-}
+export type SocialPlatform = 
+  | "instagram"
+  | "tiktok"
+  | "snapchat"
+  | "discord"
+  | "x"
+  | "whatsapp"
+  | "spotify";
 
-export interface MateConnection {
-  id: string;
-  createdAt: number;
-  targetUserId: string;
-  targetName: string;
-  targetPhotoUrl: string;
-  socialHandles: SocialHandles;
-  showOnFeed: boolean;
-  shoutout?: string;
-}
-
-export interface FeedPost {
-  id: string;
-  createdAt: number;
-  mateConnectionId: string;
-  userHandle: string;
-  targetName: string;
-  targetPhotoUrl: string;
-  shoutout?: string;
-  reactions: { hi: number; drip: number; cheers: number };
+export interface ConnectedSocial {
+  platform: SocialPlatform;
+  handle: string;
+  url?: string;
+  isPrimary?: boolean;
 }
 
 export type ActionType = "mate" | "rate" | "date" | "pass";
@@ -111,7 +119,6 @@ export interface CommunityMatePost {
   }>;
 }
 
-
 export interface GraffitiStamp {
   id: string;
   type: "text" | "sticker" | "spray";
@@ -121,11 +128,4 @@ export interface GraffitiStamp {
   color: string;
   size: number;
   rotation: number;
-}
-
-export type SoundCategory = "spray" | "stamp" | "match" | "ui";
-
-export interface SoundSettings {
-  master: boolean;
-  categories: Record<SoundCategory, boolean>;
 }
