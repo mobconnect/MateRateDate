@@ -1,0 +1,135 @@
+{
+  "entities": {
+    "MateConnection": {
+      "title": "MateConnection",
+      "description": "Mate connections between users with social handles and optional shoutout",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the mate connection"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Unix timestamp of connection creation"
+        },
+        "userId": {
+          "type": "string",
+          "description": "UID of the user who initiated or owns the connection"
+        },
+        "targetUserId": {
+          "type": "string",
+          "description": "Identifier of the target connection"
+        },
+        "targetName": {
+          "type": "string",
+          "description": "Display name of the target connection"
+        },
+        "targetPhotoUrl": {
+          "type": "string",
+          "description": "URL of the target's photo"
+        },
+        "socialHandles": {
+          "type": "object",
+          "description": "Map of connected social handles: instagram, tiktok, snapchat, discord, x, whatsapp, spotify"
+        },
+        "showOnFeed": {
+          "type": "boolean",
+          "description": "Whether to broadcast this mate connection to the public community feed"
+        },
+        "shoutout": {
+          "type": "string",
+          "description": "Optional custom street art shoutout message"
+        }
+      },
+      "required": [
+        "id",
+        "createdAt",
+        "userId",
+        "targetUserId",
+        "targetName",
+        "targetPhotoUrl",
+        "socialHandles",
+        "showOnFeed"
+      ]
+    },
+    "FeedPost": {
+      "title": "FeedPost",
+      "description": "Derived feed post from opted-in Mate connections with reactions",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the feed post"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Unix timestamp of the feed post"
+        },
+        "mateConnectionId": {
+          "type": "string",
+          "description": "Reference ID of the source mate connection"
+        },
+        "userHandle": {
+          "type": "string",
+          "description": "Display name or @handle of the poster"
+        },
+        "targetName": {
+          "type": "string",
+          "description": "Display name of the connected mate"
+        },
+        "targetPhotoUrl": {
+          "type": "string",
+          "description": "URL of the connected mate's photo"
+        },
+        "shoutout": {
+          "type": "string",
+          "description": "Optional street shoutout text"
+        },
+        "reactions": {
+          "type": "object",
+          "description": "Map of reaction counts: hi, drip, cheers"
+        }
+      },
+      "required": [
+        "id",
+        "createdAt",
+        "mateConnectionId",
+        "userHandle",
+        "targetName",
+        "targetPhotoUrl",
+        "reactions"
+      ]
+    },
+    "PassedIds": {
+      "title": "PassedIds",
+      "description": "Passed photo card IDs per user for feed and deck exclusion",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the user"
+        },
+        "ids": {
+          "type": "array",
+          "description": "List of string IDs of cards the user has passed on"
+        }
+      },
+      "required": ["userId", "ids"]
+    }
+  },
+  "firestore": {
+    "/mateConnections/{mateConnectionId}": {
+      "schema": "MateConnection",
+      "description": "Mate connections established by users"
+    },
+    "/feedPosts/{feedPostId}": {
+      "schema": "FeedPost",
+      "description": "Public community feed posts derived from opted-in mate connections"
+    },
+    "/passedIds/{userId}": {
+      "schema": "PassedIds",
+      "description": "Array of passed card IDs for each user, mirrored in localStorage"
+    }
+  }
+}

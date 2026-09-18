@@ -1,0 +1,261 @@
+@import "tailwindcss";
+
+:root {
+  --mrd-bg: #0b0b0f;
+  --mrd-surface: #11131f;
+  --mrd-text: #e6f7ff;
+  --mrd-muted: #94a3b8;
+  --mrd-cyan: #00f7ff;
+  --mrd-pink: #ff00e6;
+  --mrd-gold: #ffe600;
+  --mrd-charcoal: #2a2f3d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--mrd-bg);
+  color: var(--mrd-text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+.mrd-root {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+/* Header */
+.mrd-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(11, 11, 15, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid #1f2230;
+}
+.mrd-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.mrd-title {
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  background: linear-gradient(90deg, var(--mrd-cyan), var(--mrd-pink), var(--mrd-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 20px;
+}
+.mrd-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #0f1220;
+  color: var(--mrd-muted);
+  border: 1px solid #334155;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+.mrd-icon-btn {
+  background: #0f1220;
+  border: 1px solid #334155;
+  color: var(--mrd-text);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.mrd-icon-btn:hover {
+  border-color: var(--mrd-cyan);
+  color: var(--mrd-cyan);
+  transform: scale(1.04);
+}
+
+/* Main */
+.mrd-main {
+  min-height: 0;
+  overflow: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Bottom Nav */
+.mrd-nav {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  background: rgba(11, 11, 15, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid #1f2230;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+  gap: 6px;
+}
+.mrd-nav button {
+  background: #0f1220;
+  border: 1px solid #334155;
+  color: var(--mrd-muted);
+  border-radius: 12px;
+  padding: 8px 6px;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+.mrd-nav button:hover {
+  color: var(--mrd-text);
+  border-color: #475569;
+}
+.mrd-nav button.active {
+  color: var(--mrd-text);
+  background: linear-gradient(180deg, #161b2e, #0f1220);
+  border-color: var(--mrd-cyan);
+  box-shadow: 0 0 12px rgba(0, 247, 255, 0.15);
+}
+
+/* Deck */
+.mrd-deck {
+  position: relative;
+  max-width: 420px;
+  margin: 10px auto;
+  width: 100%;
+}
+.mrd-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--mrd-surface);
+  border: 1px solid #1f2230;
+  touch-action: pan-y;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+.mrd-card-img {
+  display: block;
+  width: 100%;
+  height: 58vh;
+  min-height: 380px;
+  max-height: 540px;
+  object-fit: cover;
+  pointer-events: none;
+}
+.mrd-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: end;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.85));
+  pointer-events: none;
+}
+.mrd-card-overlay > * {
+  pointer-events: auto;
+}
+.mrd-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+.mrd-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 12px 4px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #001018;
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.15s ease;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.mrd-btn:active {
+  transform: scale(0.94);
+}
+.mrd-btn.pass {
+  background: linear-gradient(90deg, #475569, #2a2f3d);
+  color: #e2e8f0;
+}
+.mrd-btn.mate {
+  background: linear-gradient(90deg, var(--mrd-cyan), #00c3ff);
+  color: #001018;
+}
+.mrd-btn.rate {
+  background: linear-gradient(90deg, var(--mrd-gold), #f59e0b);
+  color: #001018;
+}
+.mrd-btn.date {
+  background: linear-gradient(90deg, var(--mrd-pink), #ec4899);
+  color: #ffffff;
+}
+.mrd-swipe-hint {
+  text-align: center;
+  color: var(--mrd-muted);
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+@layer utilities {
+  .font-graffiti {
+    font-family: 'Permanent Marker', 'Sedgwick Ave Display', cursive, sans-serif;
+  }
+  .font-spray {
+    font-family: 'Sedgwick Ave Display', cursive, sans-serif;
+  }
+  .font-tag {
+    font-family: 'Rock Salt', cursive, sans-serif;
+  }
+  .font-bungee {
+    font-family: 'Bungee', cursive, sans-serif;
+  }
+}
+
+/* Custom graffiti street textures and spray highlights */
+.graffiti-shadow-pink {
+  text-shadow: 3px 3px 0px #ec4899, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000;
+}
+.graffiti-shadow-cyan {
+  text-shadow: 3px 3px 0px #06b6d4, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000;
+}
+.graffiti-shadow-yellow {
+  text-shadow: 3px 3px 0px #eab308, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000;
+}
+.graffiti-shadow-purple {
+  text-shadow: 3px 3px 0px #a855f7, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 1px 1px 0px #000;
+}
+.graffiti-stamp {
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+}
+

@@ -1,0 +1,7 @@
+{
+  "name": "MateRateDate",
+  "description": "Upload photos, tag graffiti art, cast Mate, Rate, Date, or Pass decisions, and link social accounts to connect.",
+  "packageName": "com.justbeyou.MateRateDate",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

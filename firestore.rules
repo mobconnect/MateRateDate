@@ -1,0 +1,91 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidMateConnection(data) {
+      return data.id is string && isValidId(data.id)
+        && data.createdAt is number
+        && data.userId is string && data.userId == request.auth.uid
+        && data.targetUserId is string && data.targetUserId.size() <= 128
+        && data.targetName is string && data.targetName.size() > 0 && data.targetName.size() <= 100
+        && data.targetPhotoUrl is string && data.targetPhotoUrl.size() <= 2000
+        && data.socialHandles is map
+        && data.showOnFeed is bool
+        && (!('shoutout' in data) || (data.shoutout is string && data.shoutout.size() <= 500));
+    }
+
+    function isValidFeedPost(data) {
+      return data.id is string && isValidId(data.id)
+        && data.createdAt is number
+        && data.mateConnectionId is string && isValidId(data.mateConnectionId)
+        && data.userHandle is string && data.userHandle.size() > 0 && data.userHandle.size() <= 60
+        && data.targetName is string && data.targetName.size() > 0 && data.targetName.size() <= 100
+        && data.targetPhotoUrl is string && data.targetPhotoUrl.size() <= 2000
+        && data.reactions is map
+        && (!('shoutout' in data) || (data.shoutout is string && data.shoutout.size() <= 500));
+    }
+
+    function isValidPassedIds(data) {
+      return data.userId is string && data.userId == request.auth.uid
+        && data.ids is list
+        && data.ids.size() <= 1000;
+    }
+
+    // 1. Mate Connections collection
+    match /mateConnections/{mateConnectionId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.targetUserId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(mateConnectionId) && isValidMateConnection(incoming());
+      allow update: if isSignedIn() && isValidId(mateConnectionId)
+        && resource.data.userId == request.auth.uid
+        && isValidMateConnection(incoming())
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // 2. Feed Posts collection (Publicly visible feed derived from opted-in Mate connections)
+    match /feedPosts/{feedPostId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && isValidId(feedPostId) && isValidFeedPost(incoming());
+      allow update: if isSignedIn() && isValidId(feedPostId) && isValidFeedPost(incoming())
+        && (
+          // Update reactions (incrementing counts)
+          incoming().diff(existing()).affectedKeys().hasOnly(['reactions'])
+          // Or owner updating shoutout/metadata
+          || (incoming().diff(existing()).affectedKeys().hasAny(['shoutout', 'reactions']))
+        );
+      allow delete: if isSignedIn();
+    }
+
+    // 3. Passed IDs collection (Exclusion list per user, mirrored in localStorage)
+    match /passedIds/{userId} {
+      allow get, list: if isSignedIn() && userId == request.auth.uid;
+      allow create, update: if isSignedIn() && userId == request.auth.uid && isValidPassedIds(incoming());
+      allow delete: if isSignedIn() && userId == request.auth.uid;
+    }
+  }
+}

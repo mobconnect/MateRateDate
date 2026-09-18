@@ -1,0 +1,23 @@
+{
+  "short_name": "MateRateDate",
+  "name": "MateRateDate",
+  "id": "com.justbeyou.MateRateDate",
+  "package_name": "com.justbeyou.MateRateDate",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "display": "standalone",
+  "orientation": "portrait"
+}
