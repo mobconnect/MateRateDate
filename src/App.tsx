@@ -14,6 +14,10 @@ import {
   Volume2,
   VolumeX,
   Sliders,
+  ShieldCheck,
+  CheckCircle2,
+  Shield,
+  Lock,
 } from "lucide-react";
 import {
   PhotoCard,
@@ -22,6 +26,8 @@ import {
   VoteEvent,
   CommunityMatePost,
   SoundSettings,
+  ArtistVerification,
+  UserPrivacySettings,
 } from "./types";
 import { INITIAL_PHOTO_CARDS } from "./data/mockProfiles";
 import { CardDeck } from "./components/CardDeck";
@@ -36,6 +42,13 @@ import { MobileBottomNav } from "./components/MobileBottomNav";
 import { CommunityFeedSection } from "./components/CommunityFeedSection";
 import { SoundSettingsSheet } from "./components/SoundSettingsSheet";
 import { MateModal } from "./components/MateModal";
+import { PhoneVerificationModal } from "./components/PhoneVerificationModal";
+import { PrivacySecurityModal } from "./components/PrivacySecurityModal";
+import {
+  loadArtistVerification,
+  saveArtistVerification,
+  removeArtistVerification,
+} from "./firebase/phoneVerification";
 import {
   createMateConnection,
   createFeedPost,
@@ -83,8 +96,45 @@ export default function App() {
   // User's votes history (no passes stored)
   const [votes, setVotes] = useState<VoteEvent[]>(() => {
     const saved = localStorage.getItem("mrd_votes");
-    const list: VoteEvent[] = saved ? JSON.parse(saved) : [];
-    return list.filter((v) => v.action !== "pass");
+    if (saved) {
+      const list: VoteEvent[] = JSON.parse(saved);
+      return list.filter((v) => v.action !== "pass");
+    }
+    // Seed initial chronological interactions from mock profiles so the user immediately experiences the Activity view
+    return [
+      {
+        id: "vote-seed-1",
+        cardId: INITIAL_PHOTO_CARDS[0].id,
+        cardName: INITIAL_PHOTO_CARDS[0].name,
+        cardImage: INITIAL_PHOTO_CARDS[0].imageUrl || "",
+        action: "mate",
+        timestamp: new Date(Date.now() - 8 * 60 * 1000).toISOString(),
+        targetSocials: INITIAL_PHOTO_CARDS[0].socials,
+        isArchived: false,
+      },
+      {
+        id: "vote-seed-2",
+        cardId: INITIAL_PHOTO_CARDS[1].id,
+        cardName: INITIAL_PHOTO_CARDS[1].name,
+        cardImage: INITIAL_PHOTO_CARDS[1].imageUrl || "",
+        action: "rate",
+        ratingScore: 10,
+        ratingCompliment: "10/10 Pure Drip 🔥",
+        timestamp: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
+        targetSocials: INITIAL_PHOTO_CARDS[1].socials,
+        isArchived: false,
+      },
+      {
+        id: "vote-seed-3",
+        cardId: INITIAL_PHOTO_CARDS[2].id,
+        cardName: INITIAL_PHOTO_CARDS[2].name,
+        cardImage: INITIAL_PHOTO_CARDS[2].imageUrl || "",
+        action: "date",
+        timestamp: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+        targetSocials: INITIAL_PHOTO_CARDS[2].socials,
+        isArchived: false,
+      },
+    ];
   });
 
   // User's active connected social profile
@@ -163,6 +213,66 @@ export default function App() {
 
   const [isMateModalOpen, setIsMateModalOpen] = useState(false);
   const [mateTarget, setMateTarget] = useState<{ id: string; name: string; photoUrl: string } | null>(null);
+
+  // Artist Phone Verification State (Firebase Authentication)
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [verification, setVerification] = useState<ArtistVerification>(() => loadArtistVerification());
+
+  // Individual Profile Privacy & Security Settings
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+  const [privacySettings, setPrivacySettings] = useState<UserPrivacySettings>(() => {
+    const saved = localStorage.getItem("mrd_privacy_settings");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // fallback to defaults
+      }
+    }
+    return {
+      hidePhoneNumber: true,
+      maskSocialHandle: false,
+      allowRatingsFromPublic: true,
+      allowDateRequests: true,
+      allowMateInvites: true,
+      autoBlurExifData: true,
+      activityHistoryRetentionDays: 30,
+    };
+  });
+
+  const handleUpdatePrivacySettings = (newSettings: UserPrivacySettings) => {
+    setPrivacySettings(newSettings);
+    localStorage.setItem("mrd_privacy_settings", JSON.stringify(newSettings));
+  };
+
+  const handleClearAllActivity = () => {
+    setVotes([]);
+    localStorage.removeItem("mrd_votes");
+    sounds.playStamp();
+  };
+
+  const handleVerificationSuccess = (newVerification: ArtistVerification) => {
+    setVerification(newVerification);
+    saveArtistVerification(newVerification);
+    // Mark user-created cards with verified badge
+    setCards((prev) =>
+      prev.map((c) => (c.isUserCard ? { ...c, isVerified: true } : c))
+    );
+    setMyCards((prev) =>
+      prev.map((c) => ({ ...c, isVerified: true }))
+    );
+  };
+
+  const handleUnlinkVerification = () => {
+    setVerification({ isVerified: false });
+    removeArtistVerification();
+    setCards((prev) =>
+      prev.map((c) => (c.isUserCard ? { ...c, isVerified: false } : c))
+    );
+    setMyCards((prev) =>
+      prev.map((c) => ({ ...c, isVerified: false }))
+    );
+  };
 
   // Sound FX State & Expanded Categories
   const [soundOpen, setSoundOpen] = useState(false);
@@ -340,6 +450,22 @@ export default function App() {
     setCards((prev) => prev.filter((c) => c.id !== cardId));
   };
 
+  const handleArchiveVote = (voteId: string) => {
+    setVotes((prev) =>
+      prev.map((v) => (v.id === voteId ? { ...v, isArchived: true } : v))
+    );
+  };
+
+  const handleUnarchiveVote = (voteId: string) => {
+    setVotes((prev) =>
+      prev.map((v) => (v.id === voteId ? { ...v, isArchived: false } : v))
+    );
+  };
+
+  const handleDeleteVote = (voteId: string) => {
+    setVotes((prev) => prev.filter((v) => v.id !== voteId));
+  };
+
   const handleOpenGraffitiStudio = (imageUrl: string) => {
     setStudioTargetImage(imageUrl);
     setIsGraffitiStudioOpen(true);
@@ -405,6 +531,8 @@ export default function App() {
           targetPhotoUrl: card.imageUrl || "",
           shoutout: customMessage,
           reactions: { hi: 1, drip: 1, cheers: 1 },
+          isUserVerified: verification.isVerified,
+          isTargetVerified: card.isVerified,
         }).catch((err) => console.warn("Could not save feed post to Firestore:", err));
       })
       .catch((err) => console.warn("Could not save mate connection to Firestore:", err));
@@ -480,6 +608,31 @@ export default function App() {
 
           {/* Header Action Buttons */}
           <div className="flex items-center gap-2">
+            {/* Artist Verification Badge / Link Button */}
+            {verification.isVerified ? (
+              <button
+                id="btn-header-verified"
+                type="button"
+                onClick={() => setIsVerifyModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-950/80 border border-cyan-400/80 hover:border-cyan-300 text-xs text-cyan-300 transition cursor-pointer shadow-[0_0_10px_rgba(0,247,255,0.25)]"
+                title="Verified Artist (Firebase Phone Authenticated)"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400/20" />
+                <span className="font-mono font-bold text-[11px] hidden xs:inline">Verified</span>
+              </button>
+            ) : (
+              <button
+                id="btn-header-verify"
+                type="button"
+                onClick={() => setIsVerifyModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-750 hover:border-cyan-400 text-xs text-neutral-300 hover:text-cyan-300 transition cursor-pointer"
+                title="Verify phone to earn Verified Artist checkmark"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="font-medium text-[11px] hidden xs:inline">Verify</span>
+              </button>
+            )}
+
             {/* Connected Social quick link button */}
             <button
               id="btn-header-social-link"
@@ -489,6 +642,18 @@ export default function App() {
             >
               <Share2 className="w-3.5 h-3.5 text-pink-400" />
               <span className="font-mono text-pink-300 font-medium text-[11px]">@{userSocial.handle}</span>
+            </button>
+
+            {/* Privacy & Security Shield Button */}
+            <button
+              id="btn-header-privacy-security"
+              type="button"
+              onClick={() => setIsPrivacyModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-750 hover:border-cyan-400 text-xs text-neutral-300 hover:text-cyan-300 transition cursor-pointer"
+              title="Individual Profile Privacy & Security Protection"
+            >
+              <Shield className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="font-medium text-[11px] hidden sm:inline">Privacy</span>
             </button>
 
             {/* Upload Photo Button */}
@@ -508,10 +673,10 @@ export default function App() {
               type="button"
               aria-label="Sound settings"
               onClick={() => setSoundOpen(true)}
-              className="mrd-icon-btn text-base"
-              title="Sound settings"
+              className="p-2 rounded-xl bg-neutral-900 border border-neutral-750 hover:border-cyan-400 text-neutral-400 hover:text-cyan-300 transition cursor-pointer"
+              title="Graffiti Sound Settings"
             >
-              ⚙️
+              <Sliders className="w-3.5 h-3.5" />
             </button>
           </div>
         </header>
@@ -535,6 +700,8 @@ export default function App() {
                 onToggleSound={handleToggleSound}
                 soundSettings={soundSettings}
                 onOpenSoundSettings={() => setSoundOpen(true)}
+                isUserVerified={verification.isVerified}
+                onOpenVerificationModal={() => setIsVerifyModalOpen(true)}
               />
             </div>
           )}
@@ -545,6 +712,11 @@ export default function App() {
               myCards={myCards}
               onDeleteMyCard={handleDeleteMyCard}
               onOpenUpload={() => setIsUploadModalOpen(true)}
+              isUserVerified={verification.isVerified}
+              onOpenVerificationModal={() => setIsVerifyModalOpen(true)}
+              onArchiveVote={handleArchiveVote}
+              onUnarchiveVote={handleUnarchiveVote}
+              onDeleteVote={handleDeleteVote}
             />
           )}
 
@@ -553,7 +725,11 @@ export default function App() {
               <GraffitiStudio
                 isOpen={true}
                 onClose={() => setRoute("deck")}
-                initialImageUrl={studioTargetImage || cards[0]?.imageUrl || "https://picsum.photos/600/800"}
+                initialImageUrl={
+                  studioTargetImage ||
+                  cards[0]?.imageUrl ||
+                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80"
+                }
                 onSaveToDeck={handleSaveGraffitiToDeck}
               />
             </div>
@@ -566,6 +742,8 @@ export default function App() {
               onReact={handleReactToCommunityPost}
               onAddComment={handleAddCommunityComment}
               onOpenSocialModal={() => setIsSocialModalOpen(true)}
+              isUserVerified={verification.isVerified}
+              onOpenVerificationModal={() => setIsVerifyModalOpen(true)}
             />
           )}
         </main>
@@ -602,6 +780,7 @@ export default function App() {
           onClose={() => setIsUploadModalOpen(false)}
           onAddCard={handleAddCard}
           defaultSocial={userSocial}
+          isUserVerified={verification.isVerified}
         />
 
         {/* Rating Sheet (1-10 slider & compliments) */}
@@ -640,6 +819,7 @@ export default function App() {
             target={mateTarget}
             userId={userSocial.handle || "local_user"}
             userHandle={userSocial.handle ? `@${userSocial.handle}` : "@street_artist"}
+            isUserVerified={verification.isVerified}
           />
         )}
 
@@ -659,8 +839,28 @@ export default function App() {
           onChange={handleSoundChange}
         />
 
+        {/* Firebase Phone Authentication / Verified Artist Modal */}
+        <PhoneVerificationModal
+          isOpen={isVerifyModalOpen}
+          onClose={() => setIsVerifyModalOpen(false)}
+          currentVerification={verification}
+          onVerificationSuccess={handleVerificationSuccess}
+          onUnlink={handleUnlinkVerification}
+        />
+
+        {/* Individual Profile Privacy & Security Protection Modal */}
+        <PrivacySecurityModal
+          isOpen={isPrivacyModalOpen}
+          onClose={() => setIsPrivacyModalOpen(false)}
+          privacySettings={privacySettings}
+          onUpdatePrivacySettings={handleUpdatePrivacySettings}
+          userPhone={verification.phoneNumber}
+          isVerified={verification.isVerified}
+          onClearAllActivity={handleClearAllActivity}
+        />
+
         {/* Verified MobConnect Brand Footer with Domain & DUNS config + PDF Export */}
-        <MobConnectFooter />
+        <MobConnectFooter onOpenPrivacy={() => setIsPrivacyModalOpen(true)} />
       </div>
     </FirebaseAuthProvider>
   );

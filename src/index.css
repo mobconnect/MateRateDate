@@ -176,25 +176,29 @@ body {
 
 .mrd-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
   width: 100%;
 }
 
 .mrd-btn {
   border: none;
   border-radius: 14px;
-  padding: 14px;
+  padding: 12px 6px;
   font-weight: 900;
   letter-spacing: 0.6px;
   text-transform: uppercase;
+  font-size: 13px;
   color: #001018;
   cursor: pointer;
-  transition: transform 0.12s ease;
+  transition: transform 0.12s ease, filter 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mrd-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
 
 .mrd-btn.pass {
@@ -205,6 +209,19 @@ body {
 .mrd-btn.mate {
   background: linear-gradient(90deg, var(--mrd-cyan), #00c3ff);
   color: #001018;
+  box-shadow: 0 4px 14px rgba(0, 247, 255, 0.35);
+}
+
+.mrd-btn.rate {
+  background: linear-gradient(90deg, var(--mrd-gold), #f59e0b);
+  color: #001018;
+  box-shadow: 0 4px 14px rgba(255, 230, 0, 0.35);
+}
+
+.mrd-btn.date {
+  background: linear-gradient(90deg, var(--mrd-pink), #f43f5e);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(255, 0, 230, 0.35);
 }
 
 .mrd-swipe-hint {

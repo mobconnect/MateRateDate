@@ -84,6 +84,8 @@ export async function createFeedPost(data: {
   targetPhotoUrl: string;
   shoutout?: string;
   reactions: { hi: number; drip: number; cheers: number };
+  isUserVerified?: boolean;
+  isTargetVerified?: boolean;
 }): Promise<string> {
   const id = `feed-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
   const feedRef = doc(db, "feedPosts", id);
@@ -96,6 +98,8 @@ export async function createFeedPost(data: {
     targetPhotoUrl: data.targetPhotoUrl,
     ...(data.shoutout ? { shoutout: data.shoutout } : {}),
     reactions: data.reactions || { hi: 0, drip: 0, cheers: 0 },
+    ...(data.isUserVerified !== undefined ? { isUserVerified: data.isUserVerified } : {}),
+    ...(data.isTargetVerified !== undefined ? { isTargetVerified: data.isTargetVerified } : {}),
   };
 
   await setDoc(feedRef, payload);

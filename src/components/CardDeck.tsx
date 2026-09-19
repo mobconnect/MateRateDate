@@ -11,10 +11,13 @@ import {
   Music,
   MessageCircle,
   Share2,
+  CheckCircle2,
+  ShieldCheck,
 } from "lucide-react";
 import { PhotoCard, ActionType, ConnectedSocial, SoundSettings } from "../types";
 import { playUISwipe, playStamp, playSpray } from "../utils/audio";
 import { INITIAL_PHOTO_CARDS } from "../data/mockProfiles";
+import { VerifiedArtistBadge } from "./VerifiedArtistBadge";
 
 export interface CardDeckProps {
   cards?: PhotoCard[];
@@ -28,6 +31,8 @@ export interface CardDeckProps {
   onToggleSound?: () => void;
   soundSettings?: SoundSettings;
   onOpenSoundSettings?: () => void;
+  isUserVerified?: boolean;
+  onOpenVerificationModal?: () => void;
 }
 
 export function CardDeck({
@@ -42,6 +47,8 @@ export function CardDeck({
   onToggleSound,
   soundSettings,
   onOpenSoundSettings,
+  isUserVerified = false,
+  onOpenVerificationModal,
 }: CardDeckProps = {}) {
   // Local fallback if used standalone without props
   const [localIndex, setLocalIndex] = useState(0);
@@ -195,7 +202,10 @@ export function CardDeck({
     );
   }
 
-  const imageUrl = current.imageUrl || (current as any).photoUrl || "https://picsum.photos/600/800";
+  const imageUrl =
+    current.imageUrl ||
+    (current as any).photoUrl ||
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80";
 
   return (
     <div className="mrd-deck">
@@ -277,6 +287,19 @@ export function CardDeck({
             <span className="px-2.5 py-1 rounded-full bg-black/75 backdrop-blur border border-neutral-700 text-[11px] font-graffiti text-cyan-300">
               {current.matesCount || 0} Mates
             </span>
+            {current.isVerified && (
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenVerificationModal?.();
+                }}
+                className="pointer-events-auto px-2.5 py-1 rounded-full bg-cyan-950/90 backdrop-blur border border-cyan-400/90 text-[10px] font-bold text-cyan-300 flex items-center gap-1 shadow-[0_0_10px_rgba(0,247,255,0.35)] cursor-pointer"
+                title="Verified Artist (Phone Linked via Firebase Auth)"
+              >
+                <CheckCircle2 className="w-3 h-3 text-cyan-400" />
+                <span className="font-mono tracking-wider uppercase">Verified</span>
+              </span>
+            )}
           </div>
 
           {onOpenGraffitiStudio && (
@@ -329,9 +352,18 @@ export function CardDeck({
             )}
 
             {/* Name & Age */}
-            <div className="flex items-baseline gap-2 mb-0.5">
-              <h3 className="font-graffiti text-2xl font-bold text-white tracking-wide">
-                {current.name}
+            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+              <h3 className="font-graffiti text-2xl font-bold text-white tracking-wide flex items-center gap-1.5">
+                <span>{current.name}</span>
+                {current.isVerified && (
+                  <VerifiedArtistBadge
+                    size="sm"
+                    showLabel
+                    customLabel="Verified Artist"
+                    onClick={onOpenVerificationModal}
+                    className="pointer-events-auto"
+                  />
+                )}
               </h3>
               {current.age && (
                 <span className="font-mono text-base text-neutral-300 font-semibold">

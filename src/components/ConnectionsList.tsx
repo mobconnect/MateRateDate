@@ -11,14 +11,24 @@ import {
   Trash2,
   Sparkles,
   Camera,
+  ShieldCheck,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
 import { VoteEvent, PhotoCard } from "../types";
+import { VerifiedArtistBadge } from "./VerifiedArtistBadge";
+import { ActivityTimeline } from "./ActivityTimeline";
 
 interface Props {
   votes: VoteEvent[];
   myCards: PhotoCard[];
   onDeleteMyCard?: (cardId: string) => void;
   onOpenUpload?: () => void;
+  isUserVerified?: boolean;
+  onOpenVerificationModal?: () => void;
+  onArchiveVote?: (voteId: string) => void;
+  onUnarchiveVote?: (voteId: string) => void;
+  onDeleteVote?: (voteId: string) => void;
 }
 
 export const ConnectionsList: React.FC<Props> = ({
@@ -26,10 +36,16 @@ export const ConnectionsList: React.FC<Props> = ({
   myCards,
   onDeleteMyCard,
   onOpenUpload,
+  isUserVerified = false,
+  onOpenVerificationModal,
+  onArchiveVote,
+  onUnarchiveVote,
+  onDeleteVote,
 }) => {
-  const [filter, setFilter] = useState<"all" | "mates" | "dates" | "ratings" | "my-deck">("all");
+  const [filter, setFilter] = useState<"activity" | "all" | "mates" | "dates" | "ratings" | "my-deck">("activity");
 
   const filteredVotes = votes.filter((v) => {
+    if (v.isArchived) return false;
     if (filter === "mates") return v.action === "mate";
     if (filter === "dates") return v.action === "date";
     if (filter === "ratings") return v.action === "rate";
@@ -61,6 +77,21 @@ export const ConnectionsList: React.FC<Props> = ({
 
         {/* Filter Badges */}
         <div className="flex items-center flex-wrap gap-1.5 p-1 bg-neutral-900 border border-neutral-800 rounded-2xl">
+          <button
+            type="button"
+            onClick={() => setFilter("activity")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+              filter === "activity"
+                ? "bg-gradient-to-r from-cyan-500/30 to-pink-500/30 text-white border border-cyan-400/50 shadow-sm"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Activity</span>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-neutral-800 text-neutral-300">
+              {votes.filter((v) => !v.isArchived).length}
+            </span>
+          </button>
           <button
             type="button"
             onClick={() => setFilter("all")}
@@ -119,8 +150,15 @@ export const ConnectionsList: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* MY UPLOADS VIEW */}
-      {filter === "my-deck" ? (
+      {/* ACTIVITY TIMELINE VIEW (Chronological history with swipe actions) */}
+      {filter === "activity" ? (
+        <ActivityTimeline
+          votes={votes}
+          onArchiveVote={(id) => onArchiveVote?.(id)}
+          onUnarchiveVote={(id) => onUnarchiveVote?.(id)}
+          onDeleteVote={(id) => onDeleteVote?.(id)}
+        />
+      ) : filter === "my-deck" ? (
         <div>
           {myCards.length === 0 ? (
             <div className="p-12 text-center bg-neutral-900/60 border-2 border-dashed border-neutral-800 rounded-3xl">
@@ -153,6 +191,18 @@ export const ConnectionsList: React.FC<Props> = ({
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />
+                    <div className="absolute top-2 left-2 flex items-center gap-1">
+                      {(card.isVerified || isUserVerified) && (
+                        <span
+                          onClick={onOpenVerificationModal}
+                          className="px-2 py-0.5 rounded-full bg-cyan-950/85 backdrop-blur border border-cyan-400/80 text-[10px] font-bold text-cyan-300 flex items-center gap-1 shadow-sm cursor-pointer"
+                          title="Verified Artist"
+                        >
+                          <CheckCircle2 className="w-3 h-3 text-cyan-400" />
+                          <span>Verified</span>
+                        </span>
+                      )}
+                    </div>
                     <div className="absolute top-2 right-2">
                       {onDeleteMyCard && (
                         <button
@@ -166,7 +216,12 @@ export const ConnectionsList: React.FC<Props> = ({
                       )}
                     </div>
                     <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black via-black/70 to-transparent">
-                      <h4 className="font-bold text-white text-sm">{card.name}, {card.age}</h4>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="font-bold text-white text-sm">{card.name}, {card.age}</h4>
+                        {(card.isVerified || isUserVerified) && (
+                          <VerifiedArtistBadge size="xs" showLabel={false} />
+                        )}
+                      </div>
                       <p className="text-xs text-neutral-400 truncate">{card.location}</p>
                     </div>
                   </div>

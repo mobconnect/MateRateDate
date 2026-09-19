@@ -81,7 +81,7 @@ export function generateAppCodePDF() {
     "Application Name: MateRateDate | Package Identifier: com.justbeyou.MateRateDate"
   );
   addParagraph(
-    "Registered Corporate Domain: justbeyou.com.au | D-U-N-S® Number: 59-726-146692 | ABN: 59 726 146 692"
+    "Registered Corporate Domain: justbeyou.com.au | D-U-N-S® Number: 749068766 | ABN: 59 726 146 692"
   );
   addParagraph(
     "Legal Copyright: © 2026 MateRateDate • Just Be You (justbeyou.com.au). All rights reserved."
@@ -95,7 +95,7 @@ export function generateAppCodePDF() {
 
   addSection("2. Architecture & Compliance Matrix");
   addParagraph("• Package Name: com.justbeyou.MateRateDate (Android, iOS bundle, PWA manifest)");
-  addParagraph("• Registered Entity & Domain: justbeyou.com.au (ABN: 59 726 146 692, D-U-N-S®: 59-726-146692)");
+  addParagraph("• Registered Entity & Domain: justbeyou.com.au (ABN: 59 726 146 692, D-U-N-S®: 749068766)");
   addParagraph("• Copyright: © 2026 MateRateDate • Just Be You. All rights reserved.");
   addParagraph("• Single-View Core Experience: Touch-swipe physics engine (swipe left to Pass, swipe right to Mate), real-time stamp indicators, underneath card stack preview, and Web Audio API synthesizer.");
   addParagraph("• Full-Stack Safeguards: Verified Firebase Firestore rules, resilient useCollection hook, and error boundaries.");
@@ -191,6 +191,14 @@ export const playSpray = () => controller.play("spray");
 export const playStamp = () => controller.play("stamp");
 export const playMatch = () => controller.play("match");
 export const playUISwipe = () => controller.play("ui");`);
+
+  addSection("8. User Individual Profile Privacy & Security Protection (PrivacyAct & GDPR)");
+  addParagraph(
+    "User Individual Profile Safeguards: All user-authored content, photos, and personal credentials (phone numbers, private social handles) are governed by strict client-side and cloud-side security controls. Phone numbers authenticated via Firebase are never broadcast or publicly displayed on cards. Features include client-side EXIF metadata stripping before upload, phone number UI masking, user-controlled toggle switches for rating/date permissions, right-to-erasure local activity wiping, and adherence to the Australian Privacy Act 1988 (Cth)."
+  );
+  addParagraph(
+    "Legal Copyright Notice: © 2026 MateRateDate • Just Be You (justbeyou.com.au). All rights reserved. Registered D-U-N-S®: 749068766 | ABN: 59 726 146 692."
+  );
 
   doc.save("materatedate-app-code-and-basis.pdf");
 }

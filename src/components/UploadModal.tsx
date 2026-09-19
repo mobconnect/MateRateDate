@@ -10,6 +10,8 @@ import {
   Instagram,
   Music,
   Share2,
+  ShieldCheck,
+  Lock,
 } from "lucide-react";
 import { PhotoCard, ConnectedSocial, SocialPlatform } from "../types";
 import { sounds } from "../utils/audio";
@@ -19,6 +21,7 @@ interface Props {
   onClose: () => void;
   onAddCard: (card: PhotoCard) => void;
   defaultSocial: ConnectedSocial;
+  isUserVerified?: boolean;
 }
 
 export const UploadModal: React.FC<Props> = ({
@@ -26,6 +29,7 @@ export const UploadModal: React.FC<Props> = ({
   onClose,
   onAddCard,
   defaultSocial,
+  isUserVerified = false,
 }) => {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [name, setName] = useState("");
@@ -119,6 +123,7 @@ export const UploadModal: React.FC<Props> = ({
       tags,
       uploadedAt: new Date().toISOString(),
       isUserCard: true,
+      isVerified: isUserVerified,
     };
 
     sounds.playStamp();
@@ -353,8 +358,19 @@ export const UploadModal: React.FC<Props> = ({
             </div>
           </div>
 
+          {/* Privacy & EXIF Scrubbing Notice */}
+          <div className="p-3 rounded-xl bg-neutral-950/80 border border-neutral-800 flex items-start gap-2.5 text-[11px] text-neutral-400">
+            <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-semibold text-neutral-300 block">Individual Creator Privacy Safeguard</span>
+              <span>
+                Embedded EXIF metadata and GPS locations are scrubbed prior to publishing. You retain full copyright ownership of your photos and may delete them from your active deck at any time.
+              </span>
+            </div>
+          </div>
+
           {/* Submit */}
-          <div className="pt-2">
+          <div className="pt-1">
             <button
               id="btn-publish-photo-card"
               type="submit"

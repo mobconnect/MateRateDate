@@ -1,4 +1,5 @@
 import React from "react";
+import { Volume2, VolumeX, X, Sliders, RotateCcw } from "lucide-react";
 
 type SoundCategory = "spray" | "stamp" | "match" | "ui";
 
@@ -14,11 +15,11 @@ interface Props {
   onChange: (next: SoundSettings) => void;
 }
 
-const CATEGORY_LABELS: Record<SoundCategory, string> = {
-  spray: "Spray (graffiti aerosol)",
-  stamp: "Stamp (tag impact)",
-  match: "Match (celebration)",
-  ui: "UI / Swipe (graffiti spray)",
+const CATEGORY_DETAILS: Record<SoundCategory, { name: string; desc: string }> = {
+  spray: { name: "Aerosol Spray", desc: "Graffiti can hiss on swipe & card reload" },
+  stamp: { name: "Tag Impact Stamp", desc: "Tactile boom on votes & submissions" },
+  match: { name: "Linkup Match Fanfare", desc: "Synthesizer celebration when cards connect" },
+  ui: { name: "UI Micro-Interactions", desc: "Haptic feedback clicks on toggles and filters" },
 };
 
 export function SoundSettingsSheet({ open, onClose, settings, onChange }: Props) {
@@ -44,124 +45,138 @@ export function SoundSettingsSheet({ open, onClose, settings, onChange }: Props)
 
   return (
     <div
+      id="sheet-sound-settings"
       role="dialog"
       aria-modal="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.6)",
-        display: "flex",
-        alignItems: "flex-end",
-        zIndex: 1200,
-      }}
+      aria-labelledby="sound-sheet-title"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md"
       onClick={onClose}
     >
       <div
-        style={{
-          width: "100%",
-          maxWidth: 520,
-          margin: "0 auto",
-          background: "#0b0b0f",
-          color: "#e6f7ff",
-          borderTopLeftRadius: 18,
-          borderTopRightRadius: 18,
-          padding: 18,
-          fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
-          boxShadow: "0 -10px 40px rgba(0,0,0,0.6)",
-        }}
+        className="relative w-full max-w-md bg-neutral-900 border-t-2 sm:border-2 border-neutral-750 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2
-          style={{
-            margin: "0 0 12px",
-            fontSize: 20,
-            fontWeight: 800,
-            letterSpacing: 0.5,
-            background:
-              "linear-gradient(90deg, #00f7ff, #ff00e6, #ffe600)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
+        {/* Close button */}
+        <button
+          id="btn-close-sound-sheet"
+          type="button"
+          onClick={onClose}
+          aria-label="Close sound settings dialog"
+          className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-white rounded-full bg-neutral-800 hover:bg-neutral-700 transition cursor-pointer"
         >
-          Graffiti Sound Settings
-        </h2>
+          <X className="w-5 h-5" />
+        </button>
 
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "10px 0",
-            borderBottom: "1px solid #1f2230",
-          }}
-        >
-          <span style={{ fontWeight: 700 }}>Master Audio</span>
-          <input
-            type="checkbox"
-            checked={settings.master}
-            onChange={toggleMaster}
-            style={{ width: 22, height: 22, accentColor: "#00f7ff" }}
-          />
-        </label>
+        {/* Header */}
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+            <Sliders className="w-5 h-5 text-cyan-400" />
+          </div>
+          <div>
+            <h2 id="sound-sheet-title" className="font-graffiti text-2xl text-white tracking-wide">
+              Audio & Sound Effects
+            </h2>
+            <p className="text-xs text-neutral-400">
+              Customize real-time synthesized graffiti acoustics.
+            </p>
+          </div>
+        </div>
 
-        {(Object.keys(CATEGORY_LABELS) as SoundCategory[]).map((cat) => (
-          <label
-            key={cat}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "12px 0",
-              borderBottom: "1px solid #161926",
-              opacity: settings.master ? 1 : 0.5,
-            }}
+        {/* Master audio switch */}
+        <div className="flex items-center justify-between p-3.5 rounded-2xl bg-neutral-950 border border-neutral-800 mb-3">
+          <div className="flex items-center gap-2.5">
+            {settings.master ? (
+              <Volume2 className="w-5 h-5 text-cyan-400" />
+            ) : (
+              <VolumeX className="w-5 h-5 text-neutral-500" />
+            )}
+            <div>
+              <span className="font-semibold text-white block text-sm">Master Audio</span>
+              <span className="text-[11px] text-neutral-400">Enable synthesized effects engine</span>
+            </div>
+          </div>
+          <button
+            id="btn-toggle-master-audio"
+            type="button"
+            role="switch"
+            aria-checked={settings.master}
+            onClick={toggleMaster}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+              settings.master ? "bg-cyan-500" : "bg-neutral-700"
+            }`}
           >
-            <span>{CATEGORY_LABELS[cat]}</span>
-            <input
-              type="checkbox"
-              disabled={!settings.master}
-              checked={settings.master && settings.categories[cat]}
-              onChange={() => toggleCategory(cat)}
-              style={{ width: 22, height: 22, accentColor: "#ff00e6" }}
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                settings.master ? "translate-x-5" : "translate-x-0"
+              }`}
             />
-          </label>
-        ))}
-
-        <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-          <button
-            onClick={onClose}
-            style={{
-              flex: 1,
-              padding: "12px 14px",
-              borderRadius: 12,
-              border: "none",
-              background:
-                "linear-gradient(90deg, #00f7ff, #00c3ff)",
-              color: "#001018",
-              fontWeight: 800,
-              letterSpacing: 0.4,
-            }}
-          >
-            Done
           </button>
+        </div>
+
+        {/* Category channels */}
+        <div className="space-y-2">
+          {(Object.keys(CATEGORY_DETAILS) as SoundCategory[]).map((cat) => {
+            const isEnabled = settings.master && settings.categories[cat];
+            return (
+              <div
+                key={cat}
+                className={`flex items-center justify-between p-3 rounded-xl bg-neutral-950/70 border border-neutral-850 transition ${
+                  settings.master ? "opacity-100" : "opacity-40"
+                }`}
+              >
+                <div className="pr-3">
+                  <span className="font-medium text-white block text-xs">
+                    {CATEGORY_DETAILS[cat].name}
+                  </span>
+                  <span className="text-[10px] text-neutral-400">
+                    {CATEGORY_DETAILS[cat].desc}
+                  </span>
+                </div>
+                <button
+                  id={`btn-toggle-sound-${cat}`}
+                  type="button"
+                  role="switch"
+                  disabled={!settings.master}
+                  aria-checked={isEnabled}
+                  onClick={() => toggleCategory(cat)}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:cursor-not-allowed ${
+                    isEnabled ? "bg-pink-500" : "bg-neutral-700"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      isEnabled ? "translate-x-4" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Action controls */}
+        <div className="flex items-center gap-2.5 pt-4 mt-3 border-t border-neutral-800">
           <button
+            id="btn-reset-sound-defaults"
+            type="button"
             onClick={() =>
               onChange({
                 master: true,
                 categories: { spray: true, stamp: true, match: true, ui: true },
               })
             }
-            style={{
-              flex: 1,
-              padding: "12px 14px",
-              borderRadius: 12,
-              border: "1px solid #334155",
-              background: "#0f1220",
-              color: "#94a3b8",
-              fontWeight: 700,
-            }}
+            className="flex-1 py-2.5 px-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
           >
-            Reset Defaults
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset</span>
+          </button>
+          <button
+            id="btn-done-sound-settings"
+            type="button"
+            onClick={onClose}
+            className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 text-black font-graffiti text-xs tracking-wider font-extrabold transition cursor-pointer shadow-md text-center"
+          >
+            Done
           </button>
         </div>
       </div>

@@ -9,6 +9,7 @@ import {
   Edit2,
   X,
   Building,
+  Lock,
 } from "lucide-react";
 import { generateAppCodePDF } from "../utils/pdfGenerator";
 
@@ -17,20 +18,26 @@ interface Props {
   domain?: string;
   abnNumber?: string;
   onUpdateCredentials?: (domain: string, duns: string, abn: string) => void;
+  onOpenPrivacy?: () => void;
 }
 
 export const MobConnectFooter: React.FC<Props> = ({
-  dunsNumber = "59-726-146692",
+  dunsNumber = "749068766",
   domain = "justbeyou.com.au",
   abnNumber = "59 726 146 692",
   onUpdateCredentials,
+  onOpenPrivacy,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentDomain, setCurrentDomain] = useState(() => {
     return localStorage.getItem("mrd_domain") || domain;
   });
   const [currentDuns, setCurrentDuns] = useState(() => {
-    return localStorage.getItem("mrd_duns") || dunsNumber;
+    const saved = localStorage.getItem("mrd_duns");
+    if (saved && !saved.includes("59-726") && !saved.includes("59726")) {
+      return saved;
+    }
+    return dunsNumber;
   });
   const [currentAbn, setCurrentAbn] = useState(() => {
     return localStorage.getItem("mrd_abn") || abnNumber;
@@ -159,11 +166,24 @@ export const MobConnectFooter: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Legal Copyright Line */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-neutral-400 text-[11px]">
-          <p className="text-center sm:text-left">
-            {currentCopyright}
-          </p>
+        {/* Legal Copyright Line & Privacy Protection */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-2 text-neutral-400 text-[11px]">
+          <div className="flex items-center flex-wrap justify-center sm:justify-start gap-2">
+            <span className="font-semibold text-neutral-300">
+              {currentCopyright}
+            </span>
+            <span className="text-neutral-700 hidden sm:inline">•</span>
+            <button
+              id="btn-footer-privacy-security"
+              type="button"
+              onClick={onOpenPrivacy}
+              className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 transition cursor-pointer font-medium"
+              title="Individual User Privacy, Security Controls & Australian Privacy Act Compliance"
+            >
+              <Lock className="w-3 h-3 text-cyan-400" />
+              <span>Privacy & Security Protection</span>
+            </button>
+          </div>
           <div className="flex items-center gap-3 text-neutral-400">
             <span>Urban Street Art Photo Evaluation</span>
             <span>•</span>
@@ -221,7 +241,7 @@ export const MobConnectFooter: React.FC<Props> = ({
                   type="text"
                   value={currentDuns}
                   onChange={(e) => setCurrentDuns(e.target.value)}
-                  placeholder="59-726-146692"
+                  placeholder="749068766"
                   className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-xs text-white focus:border-cyan-400 focus:outline-none"
                 />
               </div>

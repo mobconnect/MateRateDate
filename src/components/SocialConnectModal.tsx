@@ -9,6 +9,8 @@ import {
   Copy,
   X,
   Sparkles,
+  ShieldCheck,
+  Lock,
 } from "lucide-react";
 import { ConnectedSocial, SocialPlatform, ActionType } from "../types";
 
@@ -183,6 +185,17 @@ export const SocialConnectModal: React.FC<Props> = ({
                   currentMeta.prefix ? "pl-8" : "pl-4"
                 }`}
               />
+            </div>
+          </div>
+
+          {/* Privacy & Security Safe Guard */}
+          <div className="p-3 rounded-xl bg-neutral-950/80 border border-neutral-800 flex items-start gap-2.5 text-[11px] text-neutral-400">
+            <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-semibold text-neutral-300 block">Individual Profile Privacy Protection</span>
+              <span>
+                Your handle is only shared when you cast a rating or connect. We never broadcast your personal email, phone numbers, or passwords.
+              </span>
             </div>
           </div>
 

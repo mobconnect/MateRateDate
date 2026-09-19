@@ -36,6 +36,8 @@ export interface FeedPost {
   targetPhotoUrl: string;
   shoutout?: string;
   reactions: { hi: number; drip: number; cheers: number };
+  isUserVerified?: boolean;
+  isTargetVerified?: boolean;
 }
 
 export interface PhotoCard {
@@ -57,6 +59,16 @@ export interface PhotoCard {
   ownerId?: string;
   uploadedAt: string | number;
   isUserCard?: boolean;
+  isVerified?: boolean;
+  verifiedPhoneNumber?: string;
+}
+
+export interface ArtistVerification {
+  isVerified: boolean;
+  phoneNumber?: string;
+  verifiedAt?: number;
+  uid?: string;
+  artistTag?: string;
 }
 
 export type SocialPlatform = 
@@ -88,6 +100,17 @@ export interface VoteEvent {
   timestamp: string;
   voterSocial?: ConnectedSocial;
   targetSocials: ConnectedSocial[];
+  isArchived?: boolean;
+}
+
+export interface UserPrivacySettings {
+  hidePhoneNumber: boolean;
+  maskSocialHandle: boolean;
+  allowRatingsFromPublic: boolean;
+  allowDateRequests: boolean;
+  allowMateInvites: boolean;
+  autoBlurExifData: boolean;
+  activityHistoryRetentionDays: number;
 }
 
 export interface UserProfile {
@@ -98,6 +121,10 @@ export interface UserProfile {
   photos: string[];
   dunsNumber?: string;
   customDomain?: string;
+  isVerified?: boolean;
+  phoneNumber?: string;
+  verifiedAt?: number;
+  privacySettings?: UserPrivacySettings;
 }
 
 export interface CommunityMatePost {
