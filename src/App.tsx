@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   Shield,
   Lock,
+  Database,
+  Scale,
 } from "lucide-react";
 import {
   PhotoCard,
@@ -44,6 +46,8 @@ import { SoundSettingsSheet } from "./components/SoundSettingsSheet";
 import { MateModal } from "./components/MateModal";
 import { PhoneVerificationModal } from "./components/PhoneVerificationModal";
 import { PrivacySecurityModal } from "./components/PrivacySecurityModal";
+import { StorageManagerModal } from "./components/StorageManagerModal";
+import { LicensingModal } from "./components/LicensingModal";
 import {
   loadArtistVerification,
   saveArtistVerification,
@@ -213,6 +217,10 @@ export default function App() {
 
   const [isMateModalOpen, setIsMateModalOpen] = useState(false);
   const [mateTarget, setMateTarget] = useState<{ id: string; name: string; photoUrl: string } | null>(null);
+
+  // Free Storage Architecture & Licensing State
+  const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
+  const [isLicensingModalOpen, setIsLicensingModalOpen] = useState(false);
 
   // Artist Phone Verification State (Firebase Authentication)
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
@@ -678,6 +686,30 @@ export default function App() {
             >
               <Sliders className="w-3.5 h-3.5" />
             </button>
+
+            {/* Free Storage Architecture Button */}
+            <button
+              id="btn-header-storage"
+              type="button"
+              aria-label="Free Storage Architecture & Growth Projections"
+              onClick={() => setIsStorageModalOpen(true)}
+              className="p-2 rounded-xl bg-neutral-900 border border-neutral-750 hover:border-cyan-400 text-neutral-400 hover:text-cyan-300 transition cursor-pointer"
+              title="Free Storage Architecture & Growth Projections"
+            >
+              <Database className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Licensing & Legal Compliance Button */}
+            <button
+              id="btn-header-licensing"
+              type="button"
+              aria-label="Commercial & Community Licensing"
+              onClick={() => setIsLicensingModalOpen(true)}
+              className="p-2 rounded-xl bg-neutral-900 border border-neutral-750 hover:border-emerald-400 text-neutral-400 hover:text-emerald-300 transition cursor-pointer"
+              title="Licensing, Corporate Identity & WCAG 2.2"
+            >
+              <Scale className="w-3.5 h-3.5" />
+            </button>
           </div>
         </header>
 
@@ -859,8 +891,24 @@ export default function App() {
           onClearAllActivity={handleClearAllActivity}
         />
 
+        {/* Free Multi-Tier Storage Architecture & Growth Manager Modal */}
+        <StorageManagerModal
+          isOpen={isStorageModalOpen}
+          onClose={() => setIsStorageModalOpen(false)}
+        />
+
+        {/* Licensing & Legal Compliance Modal */}
+        <LicensingModal
+          isOpen={isLicensingModalOpen}
+          onClose={() => setIsLicensingModalOpen(false)}
+        />
+
         {/* Verified MobConnect Brand Footer with Domain & DUNS config + PDF Export */}
-        <MobConnectFooter onOpenPrivacy={() => setIsPrivacyModalOpen(true)} />
+        <MobConnectFooter
+          onOpenPrivacy={() => setIsPrivacyModalOpen(true)}
+          onOpenLicensing={() => setIsLicensingModalOpen(true)}
+          onOpenStorage={() => setIsStorageModalOpen(true)}
+        />
       </div>
     </FirebaseAuthProvider>
   );

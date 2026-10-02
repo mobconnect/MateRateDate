@@ -50,4 +50,39 @@ describe("<build> Test Matrix", () => {
     expect(typeof useCollection).toBe("function");
     expect(typeof ContentFeed).toBe("function");
   });
+
+  it("Centralized application strings and lookup resolve correctly", async () => {
+    const { APP_STRINGS, t } = await import("../src/data/strings");
+    expect(APP_STRINGS.meta.domain).toBe("justbeyou.com.au");
+    expect(APP_STRINGS.meta.dunsNumber).toBe("749068766");
+    expect(APP_STRINGS.meta.abnNumber).toBe("59 726 146 692");
+    expect(t("meta.appName")).toBe("MateRateDate");
+    expect(t("actions.mate.label")).toBe("MATE");
+    expect(t("storage.tiers.tier3.cost")).toBe("100% Free ($0.00)");
+  });
+
+  it("Free storage architecture engine and growth calculations resolve", async () => {
+    const {
+      formatBytes,
+      calculateGrowthExpenditure,
+      exportAppDatabaseArchive,
+      restoreAppDatabaseArchive,
+    } = await import("../src/utils/storageArchitecture");
+
+    expect(formatBytes(1024)).toBe("1 KB");
+    expect(formatBytes(1024 * 1024 * 5)).toBe("5 MB");
+
+    // Growth expenditure calculation for 25k users
+    const forecast = calculateGrowthExpenditure(25000);
+    expect(forecast.freeTierCovered).toBe(true);
+    expect(forecast.estimatedMonthlyCostUSD).toBe(0);
+    expect(forecast.clientSavingsUSD).toBeGreaterThan(0);
+
+    // Archive export and restore
+    const archive = exportAppDatabaseArchive();
+    expect(typeof archive).toBe("string");
+    expect(archive).toContain("MateRateDate");
+    expect(restoreAppDatabaseArchive(archive)).toBe(true);
+  });
 });
+

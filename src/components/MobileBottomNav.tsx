@@ -22,9 +22,9 @@ export function MobileBottomNav({ route, onNavigate, connectionsCount = 0 }: Pro
     <nav
       id="bottom-navigation-bar"
       aria-label="Main application navigation"
-      className="sticky bottom-0 z-40 w-full bg-neutral-950/90 backdrop-blur-md border-t border-neutral-800 px-3 py-2"
+      className="sticky bottom-0 z-40 w-full bg-neutral-950/92 backdrop-blur-md border-t border-neutral-800 px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]"
     >
-      <div className="max-w-md mx-auto grid grid-cols-4 gap-1 sm:gap-2">
+      <div className="max-w-md md:max-w-lg lg:max-w-xl mx-auto grid grid-cols-4 gap-1.5 sm:gap-3">
         {ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = route === item.key;

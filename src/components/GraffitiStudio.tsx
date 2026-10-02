@@ -294,7 +294,7 @@ export const GraffitiStudio: React.FC<Props> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Canvas Area */}
           <div className="lg:col-span-8 flex flex-col items-center">
-            <div className="relative w-full max-w-[420px] aspect-[4/5] bg-black rounded-2xl overflow-hidden border-2 border-neutral-700 shadow-2xl touch-none">
+            <div className="relative w-full max-w-[420px] sm:max-w-[460px] md:max-w-[500px] lg:max-w-[560px] aspect-[4/5] bg-black rounded-2xl overflow-hidden border-2 border-neutral-700 shadow-2xl touch-none">
               <canvas
                 ref={canvasRef}
                 onPointerDown={handlePointerDown}
@@ -309,7 +309,7 @@ export const GraffitiStudio: React.FC<Props> = ({
             </div>
 
             {/* Quick Canvas Actions */}
-            <div className="flex items-center justify-between w-full max-w-[420px] mt-3 gap-2">
+            <div className="flex items-center justify-between w-full max-w-[420px] sm:max-w-[460px] md:max-w-[500px] lg:max-w-[560px] mt-3 gap-2">
               <button
                 type="button"
                 onClick={handleReset}

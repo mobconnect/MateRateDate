@@ -10,6 +10,8 @@ import {
   X,
   Building,
   Lock,
+  Database,
+  Scale,
 } from "lucide-react";
 import { generateAppCodePDF } from "../utils/pdfGenerator";
 
@@ -19,6 +21,8 @@ interface Props {
   abnNumber?: string;
   onUpdateCredentials?: (domain: string, duns: string, abn: string) => void;
   onOpenPrivacy?: () => void;
+  onOpenLicensing?: () => void;
+  onOpenStorage?: () => void;
 }
 
 export const MobConnectFooter: React.FC<Props> = ({
@@ -27,6 +31,8 @@ export const MobConnectFooter: React.FC<Props> = ({
   abnNumber = "59 726 146 692",
   onUpdateCredentials,
   onOpenPrivacy,
+  onOpenLicensing,
+  onOpenStorage,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentDomain, setCurrentDomain] = useState(() => {
@@ -144,6 +150,34 @@ export const MobConnectFooter: React.FC<Props> = ({
               <span>Cross-Platform (Web • Android • iOS)</span>
             </div>
 
+            {/* Free Storage Architecture & Growth Manager */}
+            {onOpenStorage && (
+              <button
+                id="btn-footer-storage-architecture"
+                type="button"
+                onClick={onOpenStorage}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-cyan-500/50 hover:border-cyan-400 text-cyan-200 hover:text-white font-medium text-xs transition cursor-pointer shadow-sm"
+                title="Free Multi-Tier Storage Architecture, Quota & Growth Projections"
+              >
+                <Database className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Free Storage Architecture</span>
+              </button>
+            )}
+
+            {/* Licensing & Legal Compliance */}
+            {onOpenLicensing && (
+              <button
+                id="btn-footer-licensing-legal"
+                type="button"
+                onClick={onOpenLicensing}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-emerald-500/50 hover:border-emerald-400 text-emerald-200 hover:text-white font-medium text-xs transition cursor-pointer shadow-sm"
+                title="Commercial & Open Community Licensing, DUNS & WCAG 2.2"
+              >
+                <Scale className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Licensing & Legal</span>
+              </button>
+            )}
+
             {/* Download PDF of All Code & Specs */}
             <button
               id="btn-download-code-pdf"
@@ -183,6 +217,34 @@ export const MobConnectFooter: React.FC<Props> = ({
               <Lock className="w-3 h-3 text-cyan-400" />
               <span>Privacy & Security Protection</span>
             </button>
+            {onOpenLicensing && (
+              <>
+                <span className="text-neutral-700 hidden sm:inline">•</span>
+                <button
+                  id="btn-footer-link-licensing"
+                  type="button"
+                  onClick={onOpenLicensing}
+                  className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition cursor-pointer font-medium"
+                >
+                  <Scale className="w-3 h-3 text-emerald-400" />
+                  <span>Licensing & Legal</span>
+                </button>
+              </>
+            )}
+            {onOpenStorage && (
+              <>
+                <span className="text-neutral-700 hidden sm:inline">•</span>
+                <button
+                  id="btn-footer-link-storage"
+                  type="button"
+                  onClick={onOpenStorage}
+                  className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 transition cursor-pointer font-medium"
+                >
+                  <Database className="w-3 h-3 text-cyan-400" />
+                  <span>Storage Architecture</span>
+                </button>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3 text-neutral-400">
             <span>Urban Street Art Photo Evaluation</span>

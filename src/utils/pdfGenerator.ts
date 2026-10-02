@@ -196,6 +196,21 @@ export const playUISwipe = () => controller.play("ui");`);
   addParagraph(
     "User Individual Profile Safeguards: All user-authored content, photos, and personal credentials (phone numbers, private social handles) are governed by strict client-side and cloud-side security controls. Phone numbers authenticated via Firebase are never broadcast or publicly displayed on cards. Features include client-side EXIF metadata stripping before upload, phone number UI masking, user-controlled toggle switches for rating/date permissions, right-to-erasure local activity wiping, and adherence to the Australian Privacy Act 1988 (Cth)."
   );
+
+  addSection("9. Licensing & Legal Compliance");
+  addParagraph(
+    "MateRateDate is governed by a dual-tier commercial & community open-source license by Just Be You (ABN: 59 726 146 692, D-U-N-S®: 749068766, justbeyou.com.au). The software incorporates verified permissive open-source packages (React, Lucide, Tailwind, Canvas Confetti, jsPDF, Vitest, Google GenAI SDK) and complies with the Australian Privacy Principles and WCAG 2.2 Level AA accessibility standards."
+  );
+
+  addSection("10. Free Multi-Tier Storage Architecture & Growth Forecast");
+  addParagraph(
+    "Tier 1: In-Memory RAM Reactive Cache (Zero-latency state)\nTier 2: Synchronous LocalStorage (~5MB-10MB preferences)\nTier 3: High-Capacity Client IndexedDB (Unlimited disk-backed offline store for full-res pictures, graffiti blobs, and drafts)\nTier 4: Firebase Cloud Storage & Firestore (5GB Free Spark Tier, 50k reads/day at $0.00/mo)\nBecause client IndexedDB absorbs 95% of data offload, infrastructure costs remain $0.00 for up to 50,000 active users, scaling efficiently at fractional cents per GB as active membership expands."
+  );
+
+  addSection("11. Centralized Application Strings Architecture (src/data/strings.ts)");
+  addParagraph(
+    "All navigation items, button labels, modal copy, rate compliments, error handlers, and statutory terms are maintained within a typed, hierarchical strings dictionary with parameter interpolation support."
+  );
   addParagraph(
     "Legal Copyright Notice: © 2026 MateRateDate • Just Be You (justbeyou.com.au). All rights reserved. Registered D-U-N-S®: 749068766 | ABN: 59 726 146 692."
   );
