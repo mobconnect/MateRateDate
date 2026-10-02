@@ -40,6 +40,7 @@ Application: ${APP_STRINGS.meta.appName}
 Package: ${APP_STRINGS.meta.packageName}
 Entity: ${APP_STRINGS.meta.company}
 Official Domain: https://${domain}
+Live Deployment URL: https://ais-dev-6tdehh4xd4hz3w7anazvbl-607529501453.asia-east1.run.app/
 ABN: ${abn}
 D-U-N-S® Number: ${duns}
 Copyright: ${APP_STRINGS.meta.copyright}
@@ -253,6 +254,18 @@ Governed by the laws of the Commonwealth of Australia and New South Wales. Fully
                   <div className="p-2.5 rounded-lg bg-neutral-900 border border-neutral-800">
                     <span className="text-[10px] text-neutral-400 block">Australian Business Number (ABN)</span>
                     <span className="font-mono text-neutral-200">{abn}</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-neutral-900 border border-neutral-800 sm:col-span-2">
+                    <span className="text-[10px] text-neutral-400 block">Live Deployment URL</span>
+                    <a
+                      href="https://ais-dev-6tdehh4xd4hz3w7anazvbl-607529501453.asia-east1.run.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-cyan-400 hover:underline flex items-center gap-1 text-[11px] break-all"
+                    >
+                      https://ais-dev-6tdehh4xd4hz3w7anazvbl-607529501453.asia-east1.run.app/
+                      <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+                    </a>
                   </div>
                 </div>
 

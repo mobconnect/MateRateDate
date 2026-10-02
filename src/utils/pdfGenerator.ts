@@ -81,6 +81,12 @@ export function generateAppCodePDF() {
     "Application Name: MateRateDate | Package Identifier: com.justbeyou.MateRateDate"
   );
   addParagraph(
+    "Live Deployment URL: https://ais-dev-6tdehh4xd4hz3w7anazvbl-607529501453.asia-east1.run.app/"
+  );
+  addParagraph(
+    "Shared Preview URL: https://ais-pre-6tdehh4xd4hz3w7anazvbl-607529501453.asia-east1.run.app/"
+  );
+  addParagraph(
     "Registered Corporate Domain: justbeyou.com.au | D-U-N-S® Number: 749068766 | ABN: 59 726 146 692"
   );
   addParagraph(
@@ -211,6 +217,17 @@ export const playUISwipe = () => controller.play("ui");`);
   addParagraph(
     "All navigation items, button labels, modal copy, rate compliments, error handlers, and statutory terms are maintained within a typed, hierarchical strings dictionary with parameter interpolation support."
   );
+
+  addSection("12. 16+ Age Limit, Youth Cohort Protection & Local Area Discovery");
+  addParagraph(
+    "16+ Mandatory Age Gate: Users under 16 years of age are strictly prohibited from registration and profile interaction in accordance with online youth safety standards.\nYouth Cohort Isolation Algorithm: Users aged 16 to 17 are isolated from adults. Algorithms restrict 16-17 discovery strictly to peer 16-17 profiles; adults (18+) can never view, match with, or contact minors.\nAdult Cohort (18+): Adults connect exclusively with other verified adults (18+).\nLocal Area Discovery: Built-in Haversine distance engine and GPS suburb detection allow users to find creative mates within customizable geographic radiuses (5km to 100km+), with location coordinates fuzzed for privacy under the Australian Privacy Act 1988."
+  );
+
+  addSection("13. Global World Languages Internationalization (20 Languages & RTL)");
+  addParagraph(
+    "Full internationalization architecture supporting 20 world languages across all continents: English, Spanish, French, German, Portuguese, Italian, Japanese, Simplified Chinese, Korean, Arabic (with native Right-to-Left bidirectional rendering), Hindi, Indonesian, Filipino, Vietnamese, Russian, Dutch, Greek, Turkish, Swedish, and Polish. Features automatic browser locale detection, persistent language preference, and zero-reload instant switching."
+  );
+
   addParagraph(
     "Legal Copyright Notice: © 2026 MateRateDate • Just Be You (justbeyou.com.au). All rights reserved. Registered D-U-N-S®: 749068766 | ABN: 59 726 146 692."
   );

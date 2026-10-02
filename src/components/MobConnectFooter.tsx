@@ -12,8 +12,14 @@ import {
   Lock,
   Database,
   Scale,
+  Copy,
+  Zap,
 } from "lucide-react";
 import { generateAppCodePDF } from "../utils/pdfGenerator";
+
+import { useI18n } from "../i18n/i18nContext";
+
+export const DEV_APP_URL = "https://ais-dev-6tdehh4xd4hz3w7anazvbl-607529501453.asia-east1.run.app/";
 
 interface Props {
   dunsNumber?: string;
@@ -23,6 +29,7 @@ interface Props {
   onOpenPrivacy?: () => void;
   onOpenLicensing?: () => void;
   onOpenStorage?: () => void;
+  onOpenLanguage?: () => void;
 }
 
 export const MobConnectFooter: React.FC<Props> = ({
@@ -33,7 +40,9 @@ export const MobConnectFooter: React.FC<Props> = ({
   onOpenPrivacy,
   onOpenLicensing,
   onOpenStorage,
+  onOpenLanguage,
 }) => {
+  const { currentLanguage, t } = useI18n();
   const [isEditing, setIsEditing] = useState(false);
   const [currentDomain, setCurrentDomain] = useState(() => {
     return localStorage.getItem("mrd_domain") || domain;
@@ -55,6 +64,7 @@ export const MobConnectFooter: React.FC<Props> = ({
     );
   });
   const [pdfDownloaded, setPdfDownloaded] = useState(false);
+  const [urlCopied, setUrlCopied] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("mrd_domain", currentDomain);
@@ -71,6 +81,14 @@ export const MobConnectFooter: React.FC<Props> = ({
   useEffect(() => {
     localStorage.setItem("mrd_copyright", currentCopyright);
   }, [currentCopyright]);
+
+  const handleCopyUrl = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(DEV_APP_URL);
+    setUrlCopied(true);
+    setTimeout(() => setUrlCopied(false), 2500);
+  };
 
   const handleDownloadPDF = () => {
     generateAppCodePDF();
@@ -141,6 +159,35 @@ export const MobConnectFooter: React.FC<Props> = ({
             >
               <Edit2 className="w-3.5 h-3.5 text-neutral-400 hover:text-cyan-400" />
             </button>
+
+            {/* Live App URL Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-750 text-[11px] text-neutral-300">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="text-neutral-400">App URL:</span>
+              <a
+                href={DEV_APP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-cyan-300 hover:text-cyan-200 hover:underline flex items-center gap-1"
+                title="Open Live Development App URL"
+              >
+                <span>ais-dev-6tdehh4...</span>
+                <ExternalLink className="w-2.5 h-2.5 text-neutral-400" />
+              </a>
+              <button
+                type="button"
+                onClick={handleCopyUrl}
+                className="p-0.5 hover:text-white rounded transition cursor-pointer"
+                title="Copy Live Development App URL"
+                aria-label="Copy Live App URL"
+              >
+                {urlCopied ? (
+                  <Check className="w-3 h-3 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3 h-3 text-neutral-400 hover:text-cyan-300" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Cross-Platform Badges: Web, Android, iOS & PDF Generator */}
@@ -175,6 +222,20 @@ export const MobConnectFooter: React.FC<Props> = ({
               >
                 <Scale className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Licensing & Legal</span>
+              </button>
+            )}
+
+            {/* World Language Selector */}
+            {onOpenLanguage && (
+              <button
+                id="btn-footer-language"
+                type="button"
+                onClick={onOpenLanguage}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-purple-500/50 hover:border-purple-400 text-purple-200 hover:text-white font-medium text-xs transition cursor-pointer shadow-sm"
+                title="Select World Language (20 Languages)"
+              >
+                <Globe className="w-3.5 h-3.5 text-purple-400" />
+                <span>{currentLanguage.flag} {currentLanguage.nativeName}</span>
               </button>
             )}
 

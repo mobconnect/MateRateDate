@@ -13,6 +13,8 @@ export const APP_STRINGS = {
     dunsNumber: "749068766",
     abnNumber: "59 726 146 692",
     packageName: "com.justbeyou.MateRateDate",
+    appUrl: "https://ais-dev-6tdehh4xd4hz3w7anazvbl-607529501453.asia-east1.run.app",
+    sharedUrl: "https://ais-pre-6tdehh4xd4hz3w7anazvbl-607529501453.asia-east1.run.app",
     copyright: "© 2026 MateRateDate • Just Be You (justbeyou.com.au). All rights reserved.",
     accessibilityStandard: "WCAG 2.2 Level AA Compliant",
     platforms: "Web • Android • iOS",
@@ -244,6 +246,20 @@ export const APP_STRINGS = {
     networkOffline: "You are currently offline. Local actions will persist in IndexedDB and synchronize when reconnected.",
     permissionDenied: "Permission was denied. Please check your browser privacy settings.",
     corruptBackup: "The selected backup file is invalid or corrupted.",
+  },
+
+  safety: {
+    ageLimit: "16+ Age Limit Enforced",
+    minimumAge: 16,
+    adultAge: 18,
+    youthCohort: "Protected 16–17 Youth Cohort",
+    adultCohort: "Verified 18+ Adult Discovery Cohort",
+    underageBlocked: "Access Prohibited: MateRateDate is strictly 16+ only to protect young people in compliance with Australian online safety standards.",
+    youthAlgorithmDescription: "Algorithms strictly protect 16–17 year olds by keeping discovery exclusively within their peer age range. Adults (18+) can never see or contact 16–17 year old profiles.",
+    adultAlgorithmDescription: "Adults (18+) discover and connect exclusively with other adults (18+). Minors are strictly excluded from adult discovery feeds.",
+    areaDiscovery: "Find People in Your Area",
+    detectAreaButton: "Detect My Area GPS",
+    radiusLabel: "Search Radius (km)",
   },
 };
 

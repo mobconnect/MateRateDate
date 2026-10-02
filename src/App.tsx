@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Sparkles,
   Upload,
@@ -20,6 +20,7 @@ import {
   Lock,
   Database,
   Scale,
+  MapPin,
 } from "lucide-react";
 import {
   PhotoCard,
@@ -30,6 +31,7 @@ import {
   SoundSettings,
   ArtistVerification,
   UserPrivacySettings,
+  UserSafetyProfile,
 } from "./types";
 import { INITIAL_PHOTO_CARDS } from "./data/mockProfiles";
 import { CardDeck } from "./components/CardDeck";
@@ -48,6 +50,14 @@ import { PhoneVerificationModal } from "./components/PhoneVerificationModal";
 import { PrivacySecurityModal } from "./components/PrivacySecurityModal";
 import { StorageManagerModal } from "./components/StorageManagerModal";
 import { LicensingModal } from "./components/LicensingModal";
+import { AgeSafetyModal } from "./components/AgeSafetyModal";
+import { LanguageSelectorModal } from "./components/LanguageSelectorModal";
+import { useI18n } from "./i18n/i18nContext";
+import {
+  loadSafetyProfile,
+  saveSafetyProfile,
+  filterProtectedCandidates,
+} from "./utils/safetyAlgorithm";
 import {
   loadArtistVerification,
   saveArtistVerification,
@@ -87,6 +97,16 @@ export default function App() {
     return initialList.filter((c) => !passedList.includes(c.id));
   });
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+
+  // 16+ Age Safety & Cohort Isolation Profile
+  const [safetyProfile, setSafetyProfile] = useState<UserSafetyProfile>(() => loadSafetyProfile());
+  const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
+
+  // Filtered Cards: Strict 16-17 youth cohort isolation and area radius filter
+  const filteredCards = useMemo(() => {
+    const list = filterProtectedCandidates(cards, safetyProfile);
+    return list.length > 0 ? list : cards; // fallback so deck is never blank
+  }, [cards, safetyProfile]);
 
   // User's own uploads
   const [myCards, setMyCards] = useState<PhotoCard[]>(() => {
@@ -221,6 +241,8 @@ export default function App() {
   // Free Storage Architecture & Licensing State
   const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
   const [isLicensingModalOpen, setIsLicensingModalOpen] = useState(false);
+  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
+  const { currentLanguage, t } = useI18n();
 
   // Artist Phone Verification State (Firebase Authentication)
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
@@ -590,7 +612,7 @@ export default function App() {
     sounds.playSpray();
   };
 
-  const currentCard = cards[currentIndex];
+  const currentCard = filteredCards[currentIndex] || filteredCards[0] || cards[0];
 
   const handleTabChange = (nextRoute: "deck" | "connections" | "studio" | "feed") => {
     if (nextRoute === "studio") {
@@ -616,6 +638,41 @@ export default function App() {
 
           {/* Header Action Buttons */}
           <div className="flex items-center gap-2">
+            {/* World Language Selector Header Button */}
+            <button
+              id="btn-header-language"
+              type="button"
+              onClick={() => setIsLanguageModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-750 hover:border-cyan-400 text-xs text-neutral-300 hover:text-cyan-300 transition cursor-pointer"
+              title="Change World Language (20 Global Languages)"
+            >
+              <Globe className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-sm leading-none" role="img" aria-label={currentLanguage.name}>
+                {currentLanguage.flag}
+              </span>
+              <span className="font-mono text-[11px] font-bold uppercase hidden sm:inline">
+                {currentLanguage.code}
+              </span>
+            </button>
+
+            {/* 16+ Age Safety & Cohort Protection Button */}
+            <button
+              id="btn-header-safety"
+              type="button"
+              onClick={() => setIsSafetyModalOpen(true)}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition cursor-pointer ${
+                safetyProfile.cohort === "youth"
+                  ? "bg-amber-950/80 border-amber-500/80 text-amber-300 hover:border-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.25)]"
+                  : "bg-neutral-900 border-neutral-750 text-neutral-300 hover:border-cyan-400 hover:text-cyan-300"
+              }`}
+              title="16+ Age Gate, Youth Cohort Protection & Local Area Discovery"
+            >
+              <ShieldCheck className={`w-3.5 h-3.5 ${safetyProfile.cohort === "youth" ? "text-amber-400" : "text-cyan-400"}`} />
+              <span className="font-mono text-[11px] hidden xs:inline">
+                {safetyProfile.cohort === "youth" ? "16–17 Youth" : "18+ Adult"}
+              </span>
+            </button>
+
             {/* Artist Verification Badge / Link Button */}
             {verification.isVerified ? (
               <button
@@ -718,7 +775,7 @@ export default function App() {
           {route === "deck" && (
             <div className="w-full flex-1 flex flex-col items-center justify-center py-1 sm:py-2">
               <CardDeck
-                cards={cards}
+                cards={filteredCards}
                 currentIndex={currentIndex}
                 onAction={handleAction}
                 onResetDeck={handleResetDeck}
@@ -734,6 +791,8 @@ export default function App() {
                 onOpenSoundSettings={() => setSoundOpen(true)}
                 isUserVerified={verification.isVerified}
                 onOpenVerificationModal={() => setIsVerifyModalOpen(true)}
+                safetyProfile={safetyProfile}
+                onOpenSafetyModal={() => setIsSafetyModalOpen(true)}
               />
             </div>
           )}
@@ -903,11 +962,30 @@ export default function App() {
           onClose={() => setIsLicensingModalOpen(false)}
         />
 
+        {/* 16+ Age Safety, Youth Cohort Protection & Area Discovery Modal */}
+        <AgeSafetyModal
+          isOpen={isSafetyModalOpen}
+          onClose={() => setIsSafetyModalOpen(false)}
+          safetyProfile={safetyProfile}
+          onSaveProfile={(updated) => {
+            setSafetyProfile(updated);
+            saveSafetyProfile(updated);
+            setCurrentIndex(0);
+          }}
+        />
+
+        {/* World Language Selector Modal */}
+        <LanguageSelectorModal
+          isOpen={isLanguageModalOpen}
+          onClose={() => setIsLanguageModalOpen(false)}
+        />
+
         {/* Verified MobConnect Brand Footer with Domain & DUNS config + PDF Export */}
         <MobConnectFooter
           onOpenPrivacy={() => setIsPrivacyModalOpen(true)}
           onOpenLicensing={() => setIsLicensingModalOpen(true)}
           onOpenStorage={() => setIsStorageModalOpen(true)}
+          onOpenLanguage={() => setIsLanguageModalOpen(true)}
         />
       </div>
     </FirebaseAuthProvider>

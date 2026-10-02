@@ -14,10 +14,12 @@ import {
   CheckCircle2,
   ShieldCheck,
 } from "lucide-react";
-import { PhotoCard, ActionType, ConnectedSocial, SoundSettings } from "../types";
+import { PhotoCard, ActionType, ConnectedSocial, SoundSettings, UserSafetyProfile } from "../types";
 import { playUISwipe, playStamp, playSpray } from "../utils/audio";
+import { calculateDistanceKm, formatPrivacyDistance } from "../utils/safetyAlgorithm";
 import { INITIAL_PHOTO_CARDS } from "../data/mockProfiles";
 import { VerifiedArtistBadge } from "./VerifiedArtistBadge";
+import { useI18n } from "../i18n/i18nContext";
 
 export interface CardDeckProps {
   cards?: PhotoCard[];
@@ -33,6 +35,8 @@ export interface CardDeckProps {
   onOpenSoundSettings?: () => void;
   isUserVerified?: boolean;
   onOpenVerificationModal?: () => void;
+  safetyProfile?: UserSafetyProfile;
+  onOpenSafetyModal?: () => void;
 }
 
 export function CardDeck({
@@ -49,12 +53,26 @@ export function CardDeck({
   onOpenSoundSettings,
   isUserVerified = false,
   onOpenVerificationModal,
+  safetyProfile,
+  onOpenSafetyModal,
 }: CardDeckProps = {}) {
   // Local fallback if used standalone without props
   const [localIndex, setLocalIndex] = useState(0);
+  const { t } = useI18n();
   const cards = propCards && propCards.length > 0 ? propCards : INITIAL_PHOTO_CARDS;
   const index = propIndex !== undefined ? propIndex : localIndex;
   const current = cards[index];
+
+  const distanceKm =
+    current?.coordinates && safetyProfile?.location
+      ? calculateDistanceKm(
+          safetyProfile.location.lat,
+          safetyProfile.location.lng,
+          current.coordinates.lat,
+          current.coordinates.lng
+        )
+      : null;
+  const distanceDisplay = distanceKm !== null ? formatPrivacyDistance(distanceKm) : null;
 
   const [activeStamp, setActiveStamp] = useState<ActionType | null>(null);
 
@@ -226,6 +244,27 @@ export function CardDeck({
           </button>
         )}
 
+        {/* 16+ Age Cohort & Area Filter Badge */}
+        {onOpenSafetyModal && (
+          <button
+            id="btn-deck-safety-cohort"
+            type="button"
+            onClick={onOpenSafetyModal}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] font-medium transition cursor-pointer ${
+              safetyProfile?.cohort === "youth"
+                ? "bg-amber-950/60 border-amber-500/70 text-amber-300 hover:bg-amber-900/60 shadow-[0_0_8px_rgba(245,158,11,0.2)]"
+                : "bg-[#0f1220] border-[#334155] text-cyan-300 hover:border-cyan-400"
+            }`}
+            title="Configure 16+ Age Cohort Protection and Local Area Filter"
+          >
+            <ShieldCheck className={`w-3.5 h-3.5 ${safetyProfile?.cohort === "youth" ? "text-amber-400" : "text-cyan-400"}`} />
+            <span>
+              {safetyProfile?.cohort === "youth" ? "16–17 Youth Cohort" : "18+ Adult Cohort"}
+              {safetyProfile?.filterAreaOnly && safetyProfile?.location ? ` • ${safetyProfile.location.suburb}` : ""}
+            </span>
+          </button>
+        )}
+
         <div className="flex items-center gap-2 ml-auto">
           <span className="font-mono text-xs text-neutral-400 font-semibold">
             {index + 1}/{cards.length}
@@ -310,7 +349,7 @@ export function CardDeck({
               className="pointer-events-auto px-3 py-1 rounded-full bg-black/80 backdrop-blur border border-pink-500/60 text-pink-300 hover:bg-pink-600 hover:text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg transition cursor-pointer"
             >
               <Paintbrush className="w-3.5 h-3.5" />
-              <span>Spray Tag</span>
+              <span>{t("actions.sprayTag")}</span>
             </button>
           )}
         </div>
@@ -370,13 +409,27 @@ export function CardDeck({
                   {current.age}
                 </span>
               )}
+              {current.age && current.age >= 16 && current.age < 18 ? (
+                <span className="px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/80 text-amber-300 text-[10px] font-bold tracking-wider uppercase">
+                  16–17 Youth
+                </span>
+              ) : current.age && current.age >= 18 ? (
+                <span className="px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/80 text-cyan-300 text-[10px] font-bold tracking-wider uppercase">
+                  18+
+                </span>
+              ) : null}
             </div>
 
-            {/* Location */}
+            {/* Location & Distance */}
             {current.location && (
-              <div className="flex items-center gap-1.5 text-xs text-neutral-300 mb-1">
-                <MapPin className="w-3.5 h-3.5 text-neutral-400" />
+              <div className="flex items-center gap-1.5 text-xs text-neutral-300 mb-1 flex-wrap">
+                <MapPin className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
                 <span>{current.location}</span>
+                {distanceDisplay && (
+                  <span className="text-emerald-300 font-mono text-[10px] bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-700/60 font-medium">
+                    {distanceDisplay}
+                  </span>
+                )}
               </div>
             )}
 
@@ -415,7 +468,7 @@ export function CardDeck({
                 triggerAction("pass");
               }}
             >
-              PASS
+              {t("actions.pass")}
             </button>
             <button
               id="btn-deck-mate"
@@ -427,7 +480,7 @@ export function CardDeck({
                 triggerAction("mate");
               }}
             >
-              MATE
+              {t("actions.mate")}
             </button>
             <button
               id="btn-deck-rate"
@@ -438,7 +491,7 @@ export function CardDeck({
                 triggerAction("rate");
               }}
             >
-              RATE
+              {t("actions.rate")}
             </button>
             <button
               id="btn-deck-date"
@@ -449,7 +502,7 @@ export function CardDeck({
                 triggerAction("date");
               }}
             >
-              DATE
+              {t("actions.date")}
             </button>
           </div>
         </div>

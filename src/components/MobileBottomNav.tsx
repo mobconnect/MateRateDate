@@ -1,5 +1,6 @@
 import React from "react";
 import { Layers, Users, Palette, MessageSquare } from "lucide-react";
+import { useI18n } from "../i18n/i18nContext";
 
 type Route = "deck" | "connections" | "studio" | "feed";
 
@@ -10,22 +11,23 @@ interface Props {
   feedCount?: number;
 }
 
-const ITEMS: { key: Route; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { key: "deck", label: "Wall Deck", icon: Layers },
-  { key: "connections", label: "Connections", icon: Users },
-  { key: "studio", label: "Studio", icon: Palette },
-  { key: "feed", label: "Feed", icon: MessageSquare },
-];
-
 export function MobileBottomNav({ route, onNavigate, connectionsCount = 0 }: Props) {
+  const { t } = useI18n();
+
+  const items: { key: Route; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { key: "deck", label: t("nav.deck") || "Street Deck", icon: Layers },
+    { key: "connections", label: t("nav.connections") || "Connections", icon: Users },
+    { key: "studio", label: t("nav.studio") || "Studio", icon: Palette },
+    { key: "feed", label: t("nav.feed") || "Feed", icon: MessageSquare },
+  ];
   return (
     <nav
       id="bottom-navigation-bar"
       aria-label="Main application navigation"
-      className="sticky bottom-0 z-40 w-full bg-neutral-950/92 backdrop-blur-md border-t border-neutral-800 px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]"
+      className="sticky bottom-0 z-40 w-full bg-neutral-950/90 backdrop-blur-md border-t border-neutral-800 px-3 py-2"
     >
-      <div className="max-w-md md:max-w-lg lg:max-w-xl mx-auto grid grid-cols-4 gap-1.5 sm:gap-3">
-        {ITEMS.map((item) => {
+      <div className="max-w-md mx-auto grid grid-cols-4 gap-1 sm:gap-2">
+        {items.map((item) => {
           const Icon = item.icon;
           const isActive = route === item.key;
           return (

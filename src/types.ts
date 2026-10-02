@@ -61,6 +61,10 @@ export interface PhotoCard {
   isUserCard?: boolean;
   isVerified?: boolean;
   verifiedPhoneNumber?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export interface ArtistVerification {
@@ -156,3 +160,23 @@ export interface GraffitiStamp {
   size: number;
   rotation: number;
 }
+
+export type AgeCohort = "youth" | "adult";
+
+export interface UserSafetyProfile {
+  age: number; // 16+ mandatory
+  birthDate?: string;
+  isAgeVerified: boolean;
+  cohort: AgeCohort; // youth: 16-17; adult: 18+
+  location: {
+    city: string;
+    suburb: string;
+    lat: number;
+    lng: number;
+  };
+  maxDistanceKm: number; // e.g. 50km
+  filterAreaOnly: boolean;
+  minAgePreference?: number;
+  maxAgePreference?: number;
+}
+
